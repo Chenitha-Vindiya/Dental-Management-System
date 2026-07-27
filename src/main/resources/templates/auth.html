@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - Secure Access</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <style>
+        /* Keeping your exact premium glassmorphism variables */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f9f9ff 0%, #e7eeff 50%, #d8e3fb 100%);
+            --primary-color: #005ab7;
+            --primary-hover: #0072e5;
+            --text-color: #111c2d;
+            --text-muted: #414754;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --shadow-ambient: 0 20px 50px -10px rgba(0, 90, 183, 0.15);
+            --transition-speed: 0.3s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Manrope', sans-serif; }
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-gradient); color: var(--text-color); position: relative; overflow: hidden; padding: 16px; }
+
+        .ambient-orb { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; }
+        .orb-1 { width: 400px; height: 400px; background: rgba(0, 90, 183, 0.2); top: -100px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: rgba(109, 144, 255, 0.15); bottom: -150px; right: -100px; }
+
+        .auth-wrapper {
+            background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-ambient); border-radius: 32px; width: 100%; max-width: 440px;
+            padding: 48px; position: relative; overflow: hidden; text-align: center;
+        }
+
+        .brand { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--primary-color); font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .auth-header p { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; }
+
+        .step-container { display: none; animation: fadeIn 0.4s ease forwards; text-align: left; }
+        .step-container.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-color); margin-bottom: 8px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); font-size: 20px; pointer-events: none; }
+
+        .input-wrapper input {
+            width: 100%; padding: 14px 16px 14px 48px; background: var(--input-bg); border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px; font-size: 15px; color: var(--text-color); transition: all 0.3s;
+        }
+        .input-wrapper input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 90, 183, 0.1); }
+        .input-wrapper input:focus + .material-symbols-outlined { color: var(--primary-color); }
+
+        .submit-btn {
+            width: 100%; background: var(--primary-color); color: #ffffff; border: none; padding: 16px;
+            border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px;
+        }
+        .submit-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2); }
+
+        .error-message { color: #dc2626; font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div class="auth-wrapper">
+    <div class="auth-header">
+        <div class="brand">
+            <span class="material-symbols-outlined icon-fill">qr_code_2</span>
+            <span>AuraDent</span>
+        </div>
+        <p id="stepDescription">Enter your email to continue</p>
+    </div>
+
+    <!-- STEP 1: IDENTIFIER (EMAIL) -->
+    <div id="stepEmail" class="step-container active">
+        <div class="input-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+                <input type="email" id="emailInput" placeholder="sarah@auradent.com" required>
+                <span class="material-symbols-outlined">mail</span>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="checkEmail()">
+            Continue <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div id="emailError" class="error-message"></div>
+    </div>
+
+    <!-- STEP 2A: LOGIN (PASSWORD) -->
+    <div id="stepPassword" class="step-container">
+        <div class="input-group">
+            <label>Welcome back, enter your password</label>
+            <div class="input-wrapper">
+                <input type="password" id="loginPassword" placeholder="••••••••">
+                <span class="material-symbols-outlined">lock</span>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="submitLogin()">
+            Log In <span class="material-symbols-outlined">login</span>
+        </button>
+    </div>
+
+    <!-- STEP 2B: OTP VERIFICATION -->
+    <div id="stepOtp" class="step-container">
+        <div class="input-group">
+            <label>Enter the 6-digit code sent to your email</label>
+            <div class="input-wrapper">
+                <input type="text" id="otpInput" placeholder="123456" maxlength="6" style="letter-spacing: 4px; text-align: center; padding-left: 16px;">
+            </div>
+        </div>
+        <button class="submit-btn" onclick="verifyOtp()">
+            Verify Code <span class="material-symbols-outlined">check_circle</span>
+        </button>
+        <div id="otpError" class="error-message"></div>
+    </div>
+
+    <!-- STEP 3: REGISTRATION DETAILS -->
+    <div id="stepDetails" class="step-container">
+        <div class="input-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+                <input type="text" id="regName" placeholder="Dr. Sarah Jenkins">
+                <span class="material-symbols-outlined">person</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Create Password</label>
+            <div class="input-wrapper">
+                <input type="password" id="regPassword" placeholder="Strong password">
+                <span class="material-symbols-outlined">lock</span>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="completeRegistration()">
+            Create Account <span class="material-symbols-outlined">person_add</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    let currentEmail = "";
+
+    function showStep(stepId, titleText) {
+        document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+        document.getElementById(stepId).classList.add('active');
+        document.getElementById('stepDescription').innerText = titleText;
+    }
+
+    async function checkEmail() {
+        const email = document.getElementById('emailInput').value;
+        if(!email) return;
+        currentEmail = email;
+
+        // Call the Spring Boot backend
+        const response = await fetch('/api/auth/check-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'EXISTS') {
+            showStep('stepPassword', 'Sign in to your account');
+        } else if (data.status === 'NEW_USER') {
+            showStep('stepOtp', 'Verify your email address');
+        }
+    }
+
+    async function verifyOtp() {
+        const otp = document.getElementById('otpInput').value;
+        const errorDiv = document.getElementById('otpError');
+
+        const response = await fetch('/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentEmail, otp: otp })
+        });
+
+        if (response.ok) {
+            errorDiv.style.display = 'none';
+            showStep('stepDetails', 'Complete your profile setup');
+        } else {
+            errorDiv.innerText = "Invalid or expired OTP code.";
+            errorDiv.style.display = 'block';
+        }
+    }
+
+    async function completeRegistration() {
+        const fullName = document.getElementById('regName').value;
+        const password = document.getElementById('regPassword').value;
+
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentEmail, fullName: fullName, password: password })
+        });
+
+        if (response.ok) {
+            // Setup complete, redirect to dashboard
+            window.location.href = "/dashboard";
+        }
+    }
+
+    function submitLogin() {
+        // Standard form submission logic to standard Spring Security /login route goes here
+        alert("Proceeding to authentication with standard login logic...");
+    }
+</script>
+</body>
+</html>
