@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,6 +88,54 @@
             transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 90, 183, 0.1);
         }
         .social-btn svg { width: 24px; height: 24px; }
+
+        /* Modern Error Banner Styles */
+        .error-banner {
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #fff3f3; /* Light red background */
+            border: 1px solid #ffcdd2; /* Soft red border */
+            color: #d32f2f; /* Deep red text */
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .error-banner .material-symbols-outlined {
+            font-size: 18px; /* Perfectly sized icon */
+        }
+
+        /* OTP 6-Box Styling */
+        .otp-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .otp-box {
+            width: 48px;
+            height: 56px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        .otp-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 90, 183, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -104,7 +152,6 @@
         <p id="stepDescription">Enter your email to continue</p>
     </div>
 
-    <!-- STEP 1: IDENTIFIER (EMAIL) -->
     <!-- STEP 1: IDENTIFIER (EMAIL) -->
     <div id="stepEmail" class="step-container active">
         <div class="input-group">
@@ -148,6 +195,12 @@
 
     <!-- STEP 2A: LOGIN (PASSWORD) -->
     <div id="stepPassword" class="step-container">
+        <!-- Modern Error Banner for Login -->
+        <div id="loginErrorBanner" class="error-banner">
+            <span class="material-symbols-outlined">error</span>
+            <span id="loginErrorMessage">Incorrect password. Please try again.</span>
+        </div>
+
         <div class="input-group">
             <label>Welcome back, enter your password</label>
             <div class="input-wrapper">
@@ -163,9 +216,14 @@
     <!-- STEP 2B: OTP VERIFICATION -->
     <div id="stepOtp" class="step-container">
         <div class="input-group">
-            <label>Enter the 6-digit code sent to your email</label>
-            <div class="input-wrapper">
-                <input type="text" id="otpInput" placeholder="123456" maxlength="6" style="letter-spacing: 4px; text-align: center; padding-left: 16px;">
+            <label style="text-align: center;">Enter the 6-digit code sent to your email</label>
+            <div class="otp-container" id="otpContainer">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
+                <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)" onkeydown="handleBackspace(this, event)">
             </div>
         </div>
         <button class="submit-btn" onclick="verifyOtp()">
@@ -176,6 +234,11 @@
 
     <!-- STEP 3: REGISTRATION DETAILS -->
     <div id="stepDetails" class="step-container">
+        <!-- Modern Error Banner -->
+        <div id="customErrorBanner" class="error-banner">
+            <span class="material-symbols-outlined">error</span>
+            <span id="customErrorMessage">Error message goes here.</span>
+        </div>
 
         <div class="input-group">
             <label>Full Name</label>
@@ -226,6 +289,8 @@
 
     async function checkEmail() {
         const email = document.getElementById('emailInput').value;
+        const emailErrorDiv = document.getElementById('emailError'); // Make sure this exists in Step 1
+
         if(!email) return;
         currentEmail = email;
 
@@ -237,16 +302,80 @@
 
         const data = await response.json();
 
-        if (data.status === 'EXISTS') {
+        if (data.status === 'EXISTS' || data.status === 'EXISTS_ADMIN') {
+            // Both patients and admins go to the password screen
             showStep('stepPassword', 'Sign in to your account');
+        } else if (data.status === 'UNAUTHORIZED_ADMIN') {
+            // Block fake admins from trying to register
+            emailErrorDiv.innerText = "This admin account does not exist. Please contact the Super Admin.";
+            emailErrorDiv.style.display = 'block';
         } else if (data.status === 'NEW_USER') {
+            // Send new patients to OTP
             showStep('stepOtp', 'Verify your email address');
         }
     }
 
+    // Automatically move to the next box when a number is typed
+    function moveToNext(current, event) {
+        // Only allow numbers
+        current.value = current.value.replace(/[^0-9]/g, '');
+
+        if (current.value.length === 1) {
+            const next = current.nextElementSibling;
+            if (next) {
+                next.focus();
+            }
+        }
+    }
+
+    // Move to the previous box when Backspace is pressed on an empty box
+    function handleBackspace(current, event) {
+        if (event.key === "Backspace" && current.value === "") {
+            const prev = current.previousElementSibling;
+            if (prev) {
+                prev.focus();
+            }
+        }
+    }
+
+    // Allow pasting a full 6-digit code into the boxes
+    document.addEventListener('DOMContentLoaded', () => {
+        const otpContainer = document.getElementById('otpContainer');
+        if(otpContainer) {
+            otpContainer.addEventListener('paste', (e) => {
+                e.preventDefault();
+                // Get pasted text, strip non-numbers, limit to 6
+                let text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                const boxes = otpContainer.querySelectorAll('.otp-box');
+
+                for (let i = 0; i < text.length; i++) {
+                    if (boxes[i]) {
+                        boxes[i].value = text[i];
+                        if (i < 5) boxes[i+1].focus(); // Focus the next available box
+                    }
+                }
+            });
+        }
+    });
+
     async function verifyOtp() {
-        const otp = document.getElementById('otpInput').value;
+        // Grab all 6 boxes
+        const boxes = document.querySelectorAll('.otp-box');
+        let otp = "";
+
+        // Loop through them and combine the numbers
+        boxes.forEach(box => {
+            otp += box.value;
+        });
+
         const errorDiv = document.getElementById('otpError');
+
+        // Check if they filled all 6 boxes
+        if (otp.length !== 6) {
+            errorDiv.innerText = "Please enter all 6 digits.";
+            errorDiv.style.display = 'block';
+            return;
+        }
 
         const response = await fetch('/api/auth/verify-otp', {
             method: 'POST',
@@ -270,8 +399,10 @@
         const password = document.getElementById('regPassword').value;
 
         if(!fullName || !phone || !dob || !password) {
-            alert("Please fill in all fields to complete your registration.");
+            showErrorBanner("Please fill in all fields to complete your registration.");
             return;
+        } else {
+            hideErrorBanner(); // Hide it if they fixed the issue
         }
 
         const response = await fetch('/api/auth/register', {
@@ -293,8 +424,52 @@
         }
     }
 
-    function submitLogin() {
-        alert("Proceeding to authentication with standard login logic...");
+    async function submitLogin() {
+        const passwordInput = document.getElementById('loginPassword').value;
+        const banner = document.getElementById('loginErrorBanner');
+        const messageText = document.getElementById('loginErrorMessage');
+
+        banner.style.display = 'none';
+
+        if (!passwordInput) {
+            messageText.innerText = "Please enter your password.";
+            banner.style.display = 'flex';
+            return;
+        }
+
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: currentEmail,
+                password: passwordInput
+            })
+        });
+
+        if (response.ok) {
+            // Get the JSON response from the server
+            const data = await response.json();
+            // Redirect to whatever dashboard the backend tells us to!
+            window.location.href = data.redirect;
+        } else {
+            messageText.innerText = "Incorrect password. Please try again.";
+            banner.style.display = 'flex';
+        }
+    }
+
+    // Helper function to show modern errors
+    function showErrorBanner(message) {
+        const banner = document.getElementById('customErrorBanner');
+        const messageText = document.getElementById('customErrorMessage');
+
+        messageText.innerText = message;
+        banner.style.display = 'flex'; // Un-hide the banner
+    }
+
+    // Helper function to hide the error if they try again
+    function hideErrorBanner() {
+        const banner = document.getElementById('customErrorBanner');
+        banner.style.display = 'none';
     }
 </script>
 </body>

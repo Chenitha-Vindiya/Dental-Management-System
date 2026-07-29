@@ -1,16 +1,20 @@
 package org.dentalmanagementsystem.Entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "patients")
-public class Patient {
+@Table(name = "admins")
+public class Admin {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,9 +28,9 @@ public class Patient {
     @Column(nullable = false)
     private String fullName;
 
-    private String phoneNumber;
-
-    private LocalDate dateOfBirth;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AdminRole role;
 
     @CreationTimestamp
     @Column(updatable = false)
