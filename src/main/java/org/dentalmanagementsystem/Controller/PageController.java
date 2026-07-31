@@ -37,7 +37,31 @@ public class PageController {
         List<Admin> admins = adminRepository.findAll();
         // 2. Add the list to the Model so Thymeleaf can read it
         model.addAttribute("admins", admins);
+        model.addAttribute("activePage", "dashboard");
 
-        return "admin/dashboard";
+        return "admin/admin-dashboard";
+    }
+
+    @GetMapping("/admin/manage-admins")
+    public String showAdminManagementPage(Model model) {
+        // Fetch all admins to display in the table
+        List<Admin> admins = adminRepository.findAll();
+        model.addAttribute("admins", admins);
+        model.addAttribute("activePage", "manage-admins");
+
+        return "admin/admin-management";
+    }
+
+    @GetMapping("/admin/profile")
+    public String showAdminProfilePage(Model model) {
+        // Find who is logged in
+        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Admin currentAdmin = adminRepository.findByEmail(currentUserEmail);
+
+        // Pass their data to the frontend to pre-fill the form
+        model.addAttribute("admin", currentAdmin);
+        model.addAttribute("activePage", "profile");
+
+        return "admin/admin-profile";
     }
 }

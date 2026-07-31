@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Profile</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+<!--    <script th:src="@{/js/admin/admin-sidebar.js}" defer></script>-->
+
+    <style>
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 48px;
+            overflow-y: auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-ambient);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 90, 183, 0.1);
+            color: var(--primary-color);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .badge.super-admin {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge.admin {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.receptionist {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all var(--transition-speed);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="header">
+        <h1>Account Settings</h1>
+        <p style="color: var(--text-muted);">Manage your personal information and security.</p>
+    </div>
+
+    <div class="profile-card">
+        <div class="profile-header">
+            <!-- Dynamic Initial for Avatar -->
+            <div class="avatar" th:text="${#strings.substring(admin.fullName, 0, 1)}">A</div>
+            <div>
+                <h2 th:text="${admin.fullName}" style="font-size: 20px; margin-bottom: 4px;">Admin Name</h2>
+                <span class="badge" th:classappend="${#strings.toLowerCase(#strings.replace(admin.role, '_', '-'))}"
+                      th:text="${#strings.replace(admin.role, '_', ' ')}">ROLE</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+                <input type="text" id="profileName" th:value="${admin.fullName}">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+                <input type="email" id="profileEmail" th:value="${admin.email}">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Update Password (Leave blank to keep current)</label>
+            <div class="input-wrapper">
+                <input type="password" id="profilePassword" placeholder="Enter new secure password">
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="updateProfile()">
+            <span class="material-symbols-outlined">save</span> Save Changes
+        </button>
+    </div>
+</main>
+
+<script>
+    async function updateProfile() {
+        const name = document.getElementById('profileName').value;
+        const email = document.getElementById('profileEmail').value;
+        const password = document.getElementById('profilePassword').value;
+
+        if (!name || !email) {
+            alert("Name and Email are required.");
+            return;
+        }
+
+        if (!email.toLowerCase().endsWith("@admin.com")) {
+            alert("Security Error: Must use an @admin.com email address.");
+            return;
+        }
+
+        const response = await fetch('/api/admin/profile', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                fullName: name,
+                email: email,
+                password: password
+            })
+        });
+
+        if (response.ok) {
+            alert("Profile updated successfully!");
+            // Optionally redirect back to dashboard or reload
+            window.location.reload();
+        } else {
+            const errorText = await response.text();
+            alert("Update Error: " + errorText);
+        }
+    }
+
+</script>
+</body>
+</html>

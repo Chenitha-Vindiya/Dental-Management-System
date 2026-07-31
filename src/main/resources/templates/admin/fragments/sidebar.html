@@ -1,0 +1,69 @@
+<!-- Sidebar -->
+<aside class="sidebar" id="mainSidebar" th:fragment="admin-sidebar">
+    <div class="brand">
+        <!-- Interactive icon wrapper that swaps to 'menu' on hover -->
+        <div class="brand-icon-wrapper" onclick="toggleSidebar()" title="Expand/Collapse Menu">
+            <span class="material-symbols-outlined default-icon">qr_code_2</span>
+            <span class="material-symbols-outlined hover-icon">menu</span>
+        </div>
+        <span class="brand-text">AuraDent</span>
+    </div>
+
+    <nav class="nav-links">
+        <a th:href="@{/admin/dashboard}" class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-item" th:classappend="${activePage == 'patients'} ? 'active' : ''">
+            <span class="material-symbols-outlined">group</span>
+            <span class="nav-text">Patients</span>
+        </a>
+
+        <a href="#" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span class="nav-text">Appointments</span>
+        </a>
+
+        <a th:href="@{/admin/manage-admins}" class="nav-item" th:classappend="${activePage == 'manage-admins'} ? 'active' : ''">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <span class="nav-text">Admins</span>
+        </a>
+
+        <a href="#" class="nav-item" th:classappend="${activePage == 'settings'} ? 'active' : ''">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="nav-text">Settings</span>
+        </a>
+
+        <a th:href="@{/admin/profile}" class="nav-item" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+            <span class="material-symbols-outlined">account_circle</span>
+            <span class="nav-text">My Profile</span>
+        </a>
+
+        <a href="/logout" class="nav-item logout">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="nav-text">Log Out</span>
+        </a>
+    </nav>
+
+    <!-- INLINE SCRIPT: Runs instantly to prevent flickering -->
+    <script>
+        // 1. Instantly apply the collapsed state before the screen paints
+        if (localStorage.getItem("sidebar-collapsed") === "true") {
+            document.getElementById('mainSidebar').classList.add('collapsed');
+        }
+
+        // 2. Define the toggle function globally so the button can use it
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('mainSidebar');
+            sidebar.classList.toggle('collapsed');
+
+            // Save exactly as text string to prevent boolean glitches
+            if (sidebar.classList.contains('collapsed')) {
+                localStorage.setItem("sidebar-collapsed", "true");
+            } else {
+                localStorage.setItem("sidebar-collapsed", "false");
+            }
+        };
+    </script>
+</aside>

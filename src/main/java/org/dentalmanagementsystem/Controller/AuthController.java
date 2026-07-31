@@ -11,6 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -50,6 +57,21 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("status", "NEW_USER"));
     }
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        try {
+            // This calls your beautifully formatted email method!
+            authService.generateAndSendOtp(email);
+
+            return ResponseEntity.ok(Map.of("status", "SUCCESS", "message", "OTP sent successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", "ERROR", "message", "Failed to send OTP: " + e.getMessage()));
+        }
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
         boolean isValid = authService.verifyOtp(request.get("email"), request.get("otp"));
@@ -66,7 +88,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> credentials, HttpServletRequest request) {
         String email = credentials.get("email");
         String password = credentials.get("password");
 
@@ -74,6 +96,16 @@ public class AuthController {
         if (email.toLowerCase().endsWith("@admin.com")) {
             Admin admin = adminRepository.findByEmail(email);
             if (admin != null && admin.getPassword().equals(password)) {
+
+                // --- CREATE THE SPRING SECURITY SESSION ---
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                HttpSession session = request.getSession(true);
+                session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+                // ------------------------------------------
+
                 // Tell frontend to redirect to admin dashboard
                 return ResponseEntity.ok(Map.of("redirect", "/admin/dashboard"));
             }
@@ -83,6 +115,16 @@ public class AuthController {
         // 2. PATIENT LOGIN LOGIC
         Patient patient = patientRepository.findByEmail(email);
         if (patient != null && patient.getPassword().equals(password)) {
+
+            // --- CREATE THE SPRING SECURITY SESSION ---
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_PATIENT")));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            HttpSession session = request.getSession(true);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            // ------------------------------------------
+
             // Tell frontend to redirect to patient dashboard
             return ResponseEntity.ok(Map.of("redirect", "/dashboard"));
         }
