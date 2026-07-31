@@ -2,7 +2,9 @@ package org.dentalmanagementsystem.Controller;
 
 
 import org.dentalmanagementsystem.Entity.Admin;
+import org.dentalmanagementsystem.Entity.Patient;
 import org.dentalmanagementsystem.Repository.AdminRepository;
+import org.dentalmanagementsystem.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,9 @@ public class PageController {
 
     @Autowired
     private AdminRepository adminRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -57,15 +62,30 @@ public class PageController {
     }
 
     @GetMapping("/admin/profile")
-    public String showAdminProfilePage(Model model) {
-        // Find who is logged in
-        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        Admin currentAdmin = adminRepository.findByEmail(currentUserEmail);
+    public String showAdminProfile(Model model) {
+        // Get the currently logged-in user's email from Spring Security
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // Pass their data to the frontend to pre-fill the form
-        model.addAttribute("admin", currentAdmin);
+        // Fetch the admin object from the database
+        Admin admin = adminRepository.findByEmail(email);
+
+        // Add the object to the model so Thymeleaf can read it
+        model.addAttribute("admin", admin);
         model.addAttribute("activePage", "profile");
 
         return "admin/admin-profile";
+    }
+
+    @GetMapping("/admin/patients-management")
+    public String showPatientManagementPage(Model model) {
+        List<Patient> patients = patientRepository.findAll();
+        model.addAttribute("patients", patients);
+
+        model.addAttribute("activePage", "patients");
+
+        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        model.addAttribute("currentUserEmail", currentUserEmail);
+
+        return "admin/patient-management";
     }
 }
