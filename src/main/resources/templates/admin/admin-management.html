@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
-<!--    <script th:src="@{/js/admin/admin-sidebar.js}" defer></script>-->
 
     <style>
         /* Main Content */
@@ -87,6 +86,21 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover; /* Ensures the image stays perfectly inside the circle */
+            flex-shrink: 0;
+        }
+
+        /* Aligns the avatar and name side-by-side */
+        .user-profile-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         tr:last-child td {
             border-bottom: none;
         }
@@ -103,7 +117,7 @@
             color: #3730a3;
         }
 
-        .badge.admin {
+        .badge.system-admin {
             background: #dcfce7;
             color: #166534;
         }
@@ -313,7 +327,18 @@
                 </thead>
                 <tbody>
                 <tr th:each="admin : ${admins}">
-                    <td th:text="${admin.fullName}">Name</td>
+                    <!-- Profile Picture and Name -->
+                    <td>
+                        <div class="user-profile-cell">
+
+                            <!-- Generates an avatar with initials based on the admin's full name -->
+                            <img th:src="@{https://ui-avatars.com/api/(name=${admin.fullName}, background='random', bold='true')}"
+                                 alt="Profile"
+                                 class="avatar">
+
+                            <span th:text="${admin.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
+                        </div>
+                    </td>
                     <td th:text="${admin.email}">email@admin.com</td>
                     <td>
                         <span class="badge"
@@ -332,7 +357,8 @@
                     </td>
                     <!-- Action Buttons Column -->
                     <td>
-                        <div class="actions-cell">
+                        <!-- Only show buttons if it is NOT the Super Admin (ID 1) AND NOT the currently logged-in user -->
+                        <div class="actions-cell" th:if="${admin.id != 1 and admin.email != currentUserEmail}">
                             <!-- Edit Button -->
                             <button class="action-btn edit" title="Edit Admin"
                                     th:onclick="|openEditModal(${admin.id})|">
@@ -349,6 +375,15 @@
                                 <span class="material-symbols-outlined">restore</span>
                             </button>
                         </div>
+
+                        <!-- Show a label instead of buttons for protected rows -->
+                        <span th:if="${admin.id == 1}"
+                              style="font-size: 13px; font-weight: 600; color: var(--text-muted);">System Protected
+                        </span>
+                        <span th:if="${admin.email == currentUserEmail and admin.id != 1}"
+                              style="font-size: 13px; font-weight: 600; color: var(--primary-color);">
+                            Current Session
+                        </span>
                     </td>
                 </tr>
                 </tbody>
@@ -382,7 +417,7 @@
             <label>Assign Role</label>
             <div class="input-wrapper">
                 <select id="newAdminRole">
-                    <option value="ADMIN">System Admin</option>
+                    <option value="SYSTEM_ADMIN">System Admin</option>
                     <option value="RECEPTIONIST">Receptionist</option>
                     <option value="SUPER_ADMIN">Super Admin</option>
                 </select>
@@ -417,7 +452,7 @@
             <label>Assign Role</label>
             <div class="input-wrapper">
                 <select id="editAdminRole">
-                    <option value="ADMIN">System Admin</option>
+                    <option value="SYSTEM_ADMIN">System Admin</option>
                     <option value="RECEPTIONIST">Receptionist</option>
                     <option value="SUPER_ADMIN">Super Admin</option>
                 </select>

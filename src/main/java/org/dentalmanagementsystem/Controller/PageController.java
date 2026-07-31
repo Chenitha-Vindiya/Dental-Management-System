@@ -49,6 +49,10 @@ public class PageController {
         model.addAttribute("admins", admins);
         model.addAttribute("activePage", "manage-admins");
 
+        // Fetch the currently logged-in admin's email and add it to the model
+        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        model.addAttribute("currentUserEmail", currentUserEmail);
+
         return "admin/admin-management";
     }
 
