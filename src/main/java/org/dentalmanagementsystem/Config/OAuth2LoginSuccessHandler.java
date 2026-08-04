@@ -30,17 +30,33 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 
-        // Check if patient exists, if not, register them automatically
-        if (email != null && !patientRepository.existsByEmail(email)) {
-            Patient newPatient = new Patient();
-            newPatient.setEmail(email);
-            newPatient.setFullName(name);
+        if (email != null) {
+            Patient existingPatient = patientRepository.findByEmail(email);
 
-            // Generate a random placeholder password since they authenticate via OAuth2
-            newPatient.setPassword(UUID.randomUUID().toString());
+            if (existingPatient == null) {
+                // SCENARIO 1: Brand new user registering via Social Login
+                Patient newPatient = new Patient();
+                newPatient.setEmail(email);
+                newPatient.setFullName(name);
 
-            patientRepository.save(newPatient);
-            System.out.println("Registered new patient via Social Login: " + email);
+                // Generate a random placeholder password since they authenticate via OAuth2
+                newPatient.setPassword(UUID.randomUUID().toString());
+
+                // IMPORTANT: Since Google verified their email, mark them as verified!
+                newPatient.setVerified(true);
+
+                patientRepository.save(newPatient);
+                System.out.println("Registered new patient via Social Login: " + email);
+
+            } else if (!existingPatient.isVerified()) {
+                // SCENARIO 2: Admin created this user, but they used Google for their first login instead of OTP
+                // Since Google authenticated them, we can safely mark their account as verified
+                existingPatient.setVerified(true);
+
+                patientRepository.save(existingPatient);
+                System.out.println("Verified existing admin-created patient via Social Login: " + email);
+            }
+            // If existingPatient != null AND isVerified() == true, we do nothing and just let them log in.
         }
 
         // Redirect to the dashboard after successful login or registration

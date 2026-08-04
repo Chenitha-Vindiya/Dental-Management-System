@@ -1,390 +1,400 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraDent - Manage Patients</title>
+    <!DOCTYPE html>
+    <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AuraDent - Manage Patients</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
 
-    <style>
-        /* Main Content */
-        .main-content {
-            flex-grow: 1;
-            padding: 48px;
-            overflow-y: auto;
-            height: 100vh;
-        }
+        <style>
+            /* Main Content */
+            .main-content {
+                flex-grow: 1;
+                padding: 48px;
+                overflow-y: auto;
+                height: 100vh;
+            }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 40px;
+            }
 
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 4px;
-        }
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 4px;
+            }
 
-        .add-btn {
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all var(--transition-speed);
-        }
+            .add-btn {
+                background: var(--primary-color);
+                color: #fff;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all var(--transition-speed);
+            }
 
-        .add-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
-        }
+            .add-btn:hover {
+                background: var(--primary-hover);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+            }
 
-        /* Glass Card for Table */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: var(--shadow-ambient);
-            width: 100%;
-        }
+            /* Glass Card for Table */
+            .glass-card {
+                background: var(--card-bg);
+                backdrop-filter: blur(24px);
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                padding: 24px;
+                box-shadow: var(--shadow-ambient);
+                width: 100%;
+            }
 
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+            /* Table Styles */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
 
-        th {
-            text-align: left;
-            padding: 16px;
-            font-size: 13px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
+            th {
+                text-align: left;
+                padding: 16px;
+                font-size: 13px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
 
-        td {
-            padding: 16px;
-            font-size: 14px;
-            font-weight: 500;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
+            td {
+                padding: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
 
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
+            .avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                object-fit: cover;
+                flex-shrink: 0;
+            }
 
-        .user-profile-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+            .user-profile-cell {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+            tr:last-child td {
+                border-bottom: none;
+            }
 
-        /* Action Buttons */
-        .actions-cell {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
+            /* Action Buttons */
+            .actions-cell {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
 
-        .action-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-speed);
-        }
+            .action-btn {
+                background: none;
+                border: none;
+                padding: 8px;
+                border-radius: 8px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all var(--transition-speed);
+            }
 
-        .action-btn.view {
-            color: var(--primary-color);
-            background: rgba(0, 90, 183, 0.1);
-        }
+            .action-btn.view {
+                color: var(--primary-color);
+                background: rgba(0, 90, 183, 0.1);
+            }
 
-        .action-btn.view:hover {
-            background: var(--primary-color);
-            color: #fff;
-        }
+            .action-btn.view:hover {
+                background: var(--primary-color);
+                color: #fff;
+            }
 
-        .action-btn.deactivate {
-            color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
+            .action-btn.deactivate {
+                color: #dc2626;
+                background: rgba(220, 38, 38, 0.1);
+            }
 
-        .action-btn.deactivate:hover {
-            background: #dc2626;
-            color: #fff;
-        }
+            .action-btn.deactivate:hover {
+                background: #dc2626;
+                color: #fff;
+            }
 
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(17, 28, 45, 0.4);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            opacity: 0;
-            transition: opacity var(--transition-speed);
-        }
+            /* Modal Styles */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(17, 28, 45, 0.4);
+                backdrop-filter: blur(8px);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                opacity: 0;
+                transition: opacity var(--transition-speed);
+            }
 
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
+            .modal-overlay.active {
+                display: flex;
+                opacity: 1;
+            }
 
-        .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 32px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: var(--shadow-ambient);
-            transform: translateY(20px);
-            transition: transform var(--transition-speed);
-        }
+            .modal-content {
+                background: var(--glass-bg);
+                backdrop-filter: blur(24px);
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                padding: 32px;
+                width: 100%;
+                max-width: 440px;
+                box-shadow: var(--shadow-ambient);
+                transform: translateY(20px);
+                transition: transform var(--transition-speed);
+            }
 
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
+            .modal-overlay.active .modal-content {
+                transform: translateY(0);
+            }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+            }
 
-        .modal-header h2 {
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+            .modal-header h2 {
+                font-size: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            transition: 0.2s;
-        }
+            .close-btn {
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                display: flex;
+                transition: 0.2s;
+            }
 
-        .close-btn:hover {
-            color: #dc2626;
-            transform: rotate(90deg);
-        }
+            .close-btn:hover {
+                color: #dc2626;
+                transform: rotate(90deg);
+            }
 
-        .input-group {
-            margin-bottom: 16px;
-        }
+            .input-group {
+                margin-bottom: 16px;
+            }
 
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-color);
-        }
+            .input-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: var(--text-color);
+            }
 
-        .input-wrapper input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s;
-        }
+            .input-wrapper input {
+                width: 100%;
+                padding: 12px 16px;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                background: rgba(255, 255, 255, 0.9);
+                font-size: 14px;
+                outline: none;
+                transition: all 0.3s;
+            }
 
-        .input-wrapper input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
-        }
+            .input-wrapper input:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+            }
 
-        .submit-btn {
-            width: 100%;
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 24px;
-            transition: all var(--transition-speed);
-        }
+            .submit-btn {
+                width: 100%;
+                background: var(--primary-color);
+                color: #fff;
+                border: none;
+                padding: 14px;
+                border-radius: 12px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 24px;
+                transition: all var(--transition-speed);
+            }
 
-        .submit-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
-        }
-    </style>
-</head>
-<body>
+            .submit-btn:hover {
+                background: var(--primary-hover);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+            }
+        </style>
+    </head>
+    <body>
 
-<div class="ambient-orb orb-1"></div>
-<div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
 
-<!-- Sidebar Fragment Integration -->
-<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
+    <!-- Sidebar Fragment Integration -->
+    <div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
 
-<!-- Main Content -->
-<main class="main-content">
-    <div class="header">
-        <div>
-            <h1>Patient Directory</h1>
-            <p style="color: var(--text-muted);">Manage registered patient profiles and medical records.</p>
-        </div>
-        <button class="add-btn" onclick="openAddPatientModal()">
-            <span class="material-symbols-outlined">person_add</span> Register Patient
-        </button>
-    </div>
-
-    <!-- Patients Data Table -->
-    <div class="glass-card">
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                <tr>
-                    <th>Patient Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- Loop through patients model attribute -->
-                <tr th:each="patient : ${patients}">
-                    <td>
-                        <div class="user-profile-cell">
-                            <img th:src="@{https://ui-avatars.com/api/(name=${patient.fullName}, background='random', bold='true')}"
-                                 alt="Profile" class="avatar">
-                            <span th:text="${patient.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
-                        </div>
-                    </td>
-                    <td th:text="${patient.email}">email@patient.com</td>
-                    <td th:text="${patient.phoneNumber}">+94 77 123 4567</td>
-                    <td>
-                        <span style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active
-                        </span>
-                    </td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="action-btn view" title="View Profile" th:onclick="|viewPatientProfile(${patient.id})|">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </button>
-                            <button class="action-btn deactivate" title="Disable Account">
-                                <span class="material-symbols-outlined">block</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-
-<!-- REGISTER PATIENT MODAL -->
-<div class="modal-overlay" id="addPatientModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><span class="material-symbols-outlined">person_add</span> New Patient Registration</h2>
-            <button class="close-btn" onclick="closeModal('addPatientModal')">
-                <span class="material-symbols-outlined">close</span>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div>
+                <h1>Patient Directory</h1>
+                <p style="color: var(--text-muted);">Manage registered patient profiles and medical records.</p>
+            </div>
+            <button class="add-btn" onclick="openAddPatientModal()">
+                <span class="material-symbols-outlined">person_add</span> Register Patient
             </button>
         </div>
-        <div class="input-group">
-            <label>Full Name</label>
-            <div class="input-wrapper"><input type="text" id="patientName" placeholder="e.g. John Doe"></div>
+
+        <!-- Patients Data Table -->
+        <div class="glass-card">
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Patient Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Loop through patients model attribute -->
+                    <tr th:each="patient : ${patients}">
+                        <td>
+                            <div class="user-profile-cell">
+                                <img th:src="@{https://ui-avatars.com/api/(name=${patient.fullName}, background='random', bold='true')}"
+                                     alt="Profile" class="avatar">
+                                <span th:text="${patient.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
+                            </div>
+                        </td>
+                        <td th:text="${patient.email}">email@patient.com</td>
+                        <td th:text="${patient.phoneNumber}">+94 77 123 4567</td>
+                        <td>
+                            <span style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn view" title="View Profile" th:onclick="|viewPatientProfile(${patient.id})|">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                </button>
+                                <button class="action-btn deactivate" title="Disable Account">
+                                    <span class="material-symbols-outlined">block</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="input-group">
-            <label>Email Address</label>
-            <div class="input-wrapper"><input type="email" id="patientEmail" placeholder="john@example.com"></div>
+    </main>
+
+    <!-- REGISTER PATIENT MODAL -->
+    <div class="modal-overlay" id="addPatientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><span class="material-symbols-outlined">person_add</span> New Patient Registration</h2>
+                <button class="close-btn" onclick="closeModal('addPatientModal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="input-group">
+                <label>Full Name</label>
+                <div class="input-wrapper"><input type="text" id="patientName" placeholder="e.g. John Doe"></div>
+            </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <div class="input-wrapper"><input type="email" id="patientEmail" placeholder="john@example.com"></div>
+            </div>
+            <div class="input-group">
+                <label>Phone Number</label>
+                <div class="input-wrapper"><input type="text" id="patientPhone" placeholder="+94 XX XXX XXXX"></div>
+            </div>
+            <button class="submit-btn" onclick="submitNewPatient()">Save Patient Record</button>
         </div>
-        <div class="input-group">
-            <label>Phone Number</label>
-            <div class="input-wrapper"><input type="text" id="patientPhone" placeholder="+94 XX XXX XXXX"></div>
-        </div>
-        <button class="submit-btn" onclick="submitNewPatient()">Save Patient Record</button>
     </div>
-</div>
 
-<script>
-    function openAddPatientModal() {
-        document.getElementById('addPatientModal').classList.add('active');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-    }
-
-    window.onclick = function (event) {
-        const modal = document.getElementById('addPatientModal');
-        if (event.target == modal) closeModal('addPatientModal');
-    }
-
-    async function submitNewPatient() {
-        const name = document.getElementById('patientName').value;
-        const email = document.getElementById('patientEmail').value;
-        const phone = document.getElementById('patientPhone').value;
-
-        if (!name || !email || !phone) {
-            alert("Please fill in all required fields.");
-            return;
+    <script>
+        function openAddPatientModal() {
+            document.getElementById('addPatientModal').classList.add('active');
         }
 
-        // Add your fetch logic post request here to save patient profile
-        alert("Patient registered successfully!");
-        closeModal('addPatientModal');
-        window.location.reload();
-    }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
 
-    function viewPatientProfile(id) {
-        // Redirect or open patient clinical details modal
-        window.location.href = `/admin/patients/${id}`;
-    }
-</script>
-</body>
-</html>
+        window.onclick = function (event) {
+            const modal = document.getElementById('addPatientModal');
+            if (event.target == modal) closeModal('addPatientModal');
+        }
+
+        async function submitNewPatient() {
+            const name = document.getElementById('patientName').value;
+            const email = document.getElementById('patientEmail').value;
+            const phone = document.getElementById('patientPhone').value;
+
+            if (!name || !email || !phone) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            // Hit the new admin API endpoint
+            const response = await fetch('/api/admin/add-patient', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ fullName: name, email: email, phoneNumber: phone })
+            });
+
+            if (response.ok) {
+                alert("Patient registered successfully!");
+                closeModal('addPatientModal');
+                window.location.reload();
+            } else {
+                alert("Failed to add patient.");
+            }
+        }
+
+        function viewPatientProfile(id) {
+            // Redirect or open patient clinical details modal
+            window.location.href = `/admin/patients/${id}`;
+        }
+    </script>
+    </body>
+    </html>

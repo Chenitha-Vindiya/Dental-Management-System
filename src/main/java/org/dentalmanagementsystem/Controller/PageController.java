@@ -40,7 +40,9 @@ public class PageController {
     public String showAdminDashboard(Model model) {
         // 1. Fetch all admins from the database
         List<Admin> admins = adminRepository.findAll();
+        long totalPatients = patientRepository.count();
         // 2. Add the list to the Model so Thymeleaf can read it
+        model.addAttribute("totalPatients", totalPatients);
         model.addAttribute("admins", admins);
         model.addAttribute("activePage", "dashboard");
 

@@ -46,15 +46,31 @@ public class AuthController {
         // 2. IF NOT ADMIN, IT MUST BE A PATIENT
         Patient patient = patientRepository.findByEmail(email);
         if (patient != null) {
-            if (patient.getPassword() != null) {
-                return ResponseEntity.ok(Map.of("status", "EXISTS")); // Has password
+            // NEW: Check the boolean flag instead of the password
+            if (patient.isVerified()) {
+                return ResponseEntity.ok(Map.of("status", "EXISTS")); // Normal login
             } else {
-                return ResponseEntity.ok(Map.of("status", "NEW_USER")); // Social login only, or incomplete
+                // Admin created them, but they haven't verified and set their real password yet
+                return ResponseEntity.ok(Map.of("status", "NEEDS_PASSWORD"));
             }
         }
-
-        // Brand new patient
         return ResponseEntity.ok(Map.of("status", "NEW_USER"));
+    }
+
+    //For saving ONLY the password after OTP
+    @PostMapping("/set-password")
+    public ResponseEntity<?> setPassword(@RequestBody Map<String, String> request) {
+        Patient patient = patientRepository.findByEmail(request.get("email"));
+        if (patient != null) {
+            patient.setPassword(request.get("password"));
+
+            // IMPORTANT: Mark them as verified now!
+            patient.setVerified(true);
+
+            patientRepository.save(patient);
+            return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+        }
+        return ResponseEntity.badRequest().body("User not found");
     }
 
     @PostMapping("/send-otp")
@@ -83,6 +99,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Patient patient) {
+        // Since public users verify OTP BEFORE reaching this step, they are verified immediately
+        patient.setVerified(true);
         authService.registerNewPatient(patient);
         return ResponseEntity.ok(Map.of("status", "REGISTERED"));
     }

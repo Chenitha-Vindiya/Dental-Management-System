@@ -303,6 +303,35 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 4px rgba(0, 90, 183, 0.1);
         }
+
+        /* Resend OTP Styles */
+        .resend-container {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .resend-link {
+            color: var(--primary-color);
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            pointer-events: none; /* Disabled by default while counting down */
+            opacity: 0.5;
+            transition: all var(--transition-speed);
+            margin-left: 4px;
+        }
+
+        .resend-link.active {
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .resend-link.active:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -387,7 +416,10 @@
     <!-- STEP 2B: OTP VERIFICATION -->
     <div id="stepOtp" class="step-container">
         <div class="input-group">
-            <label style="text-align: center;">Enter the 6-digit code sent to your email</label>
+            <label style="text-align: center;">Enter the 6-digit code sent to</label>
+            <!-- Added dynamic email display -->
+            <p id="displaySentEmail" style="text-align: center; font-weight: 700; color: var(--primary-color); margin-bottom: 16px; font-size: 15px;"></p>
+
             <div class="otp-container" id="otpContainer">
                 <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)"
                        onkeydown="handleBackspace(this, event)">
@@ -407,9 +439,17 @@
             Verify Code <span class="material-symbols-outlined">check_circle</span>
         </button>
         <div id="otpError" class="error-message"></div>
+
+        <!-- Added Resend Container -->
+        <div class="resend-container">
+            Didn't receive the code?
+            <a class="resend-link" id="resendOtpBtn" onclick="resendOtp()">
+                Resend Code <span id="resendTimer">(60s)</span>
+            </a>
+        </div>
     </div>
 
-    <!-- STEP 3: REGISTRATION DETAILS -->
+    <!-- STEP 3A: REGISTRATION DETAILS -->
     <div id="stepDetails" class="step-container">
         <!-- Modern Error Banner -->
         <div id="customErrorBanner" class="error-banner">
@@ -434,14 +474,6 @@
         </div>
 
         <div class="input-group">
-            <label>Date of Birth</label>
-            <div class="input-wrapper">
-                <!-- The date input automatically shows a calendar picker -->
-                <input type="date" id="regDob" style="padding-left: 16px;">
-            </div>
-        </div>
-
-        <div class="input-group">
             <label>Create Password</label>
             <div class="input-wrapper">
                 <input type="password" id="regPassword" placeholder="Strong password">
@@ -453,10 +485,26 @@
             Create Account <span class="material-symbols-outlined">person_add</span>
         </button>
     </div>
+
+    <!-- STEP 3B: SET PASSWORD ONLY -->
+    <div id="stepSetPasswordOnly" class="step-container">
+        <div class="input-group">
+            <label>Set Your Password</label>
+            <div class="input-wrapper">
+                <input type="password" id="onlyPassword" placeholder="Strong password">
+                <span class="material-symbols-outlined">lock</span>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="saveNewPassword()">
+            Save & Login <span class="material-symbols-outlined">login</span>
+        </button>
+    </div>
 </div>
 
 <script>
     let currentEmail = "";
+    let timerInterval;
+    let isExistingAdminUser = false; // NEW: Tracks if the user was created by an admin
 
     function showStep(stepId, titleText) {
         document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
@@ -484,18 +532,84 @@
         } else if (data.status === 'UNAUTHORIZED_ADMIN') {
             emailErrorDiv.innerText = "This admin account does not exist. Please contact the Super Admin.";
             emailErrorDiv.style.display = 'block';
-        } else if (data.status === 'NEW_USER') {
+        } else if (data.status === 'NEEDS_PASSWORD') {
 
-            // 1. Tell the backend to generate and send the OTP to the database and email
+            // NEW LOGIC: Admin created this user, they only need to set a password
+            isExistingAdminUser = true;
+
             await fetch('/api/auth/send-otp', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({email: email})
             });
 
-            // 2. Change the UI to the OTP screen
+            document.getElementById('displaySentEmail').innerText = email;
+            startResendTimer();
+            showStep('stepOtp', 'Verify your email address');
+
+        } else if (data.status === 'NEW_USER') {
+
+            // NORMAL LOGIC: Brand new user registering themselves
+            isExistingAdminUser = false;
+
+            // 1. Tell the backend to generate and send the OTP
+            await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email: email})
+            });
+
+            // 2. Display the email in the UI
+            document.getElementById('displaySentEmail').innerText = email;
+
+            // 3. Start the 60-second countdown
+            startResendTimer();
+
+            // 4. Change the UI to the OTP screen
             showStep('stepOtp', 'Verify your email address');
         }
+    }
+
+    // --- TIMER & RESEND LOGIC ---
+    function startResendTimer() {
+        const resendBtn = document.getElementById('resendOtpBtn');
+        const timerSpan = document.getElementById('resendTimer');
+        let timeLeft = 60; // 60 seconds
+
+        // Reset the button state
+        resendBtn.classList.remove('active');
+        timerSpan.innerText = `(${timeLeft}s)`;
+
+        // Clear any existing timer to prevent bugs
+        clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerSpan.innerText = `(${timeLeft}s)`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerSpan.innerText = ""; // Remove the (0s) text
+                resendBtn.classList.add('active'); // Make the button clickable
+            }
+        }, 1000);
+    }
+
+    async function resendOtp() {
+        const resendBtn = document.getElementById('resendOtpBtn');
+
+        // Prevent clicking if the timer isn't done
+        if (!resendBtn.classList.contains('active')) return;
+
+        // Re-send the OTP via the backend
+        await fetch('/api/auth/send-otp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: currentEmail})
+        });
+
+        // Restart the countdown timer
+        startResendTimer();
     }
 
     // Automatically move to the next box when a number is typed
@@ -568,20 +682,48 @@
 
         if (response.ok) {
             errorDiv.style.display = 'none';
-            showStep('stepDetails', 'Complete your profile setup');
+
+            // NEW LOGIC: Route to the correct screen based on user type
+            if (isExistingAdminUser) {
+                showStep('stepSetPasswordOnly', 'Create your password');
+            } else {
+                showStep('stepDetails', 'Complete your profile setup');
+            }
+
         } else {
             errorDiv.innerText = "Invalid or expired OTP code.";
             errorDiv.style.display = 'block';
         }
     }
 
+    // NEW FUNCTION: Handles saving just the password for admin-created patients
+    async function saveNewPassword() {
+        const password = document.getElementById('onlyPassword').value;
+
+        if (!password) {
+            alert("Please enter a password.");
+            return;
+        }
+
+        const response = await fetch('/api/auth/set-password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: currentEmail, password: password })
+        });
+
+        if (response.ok) {
+            window.location.href = "/dashboard";
+        } else {
+            alert("Failed to save password. Please try again.");
+        }
+    }
+
     async function completeRegistration() {
         const fullName = document.getElementById('regName').value;
         const phone = document.getElementById('regPhone').value;
-        const dob = document.getElementById('regDob').value;
         const password = document.getElementById('regPassword').value;
 
-        if (!fullName || !phone || !dob || !password) {
+        if (!fullName || !phone || !password) {
             showErrorBanner("Please fill in all fields to complete your registration.");
             return;
         } else {
@@ -595,7 +737,6 @@
                 email: currentEmail,
                 fullName: fullName,
                 phoneNumber: phone,
-                dateOfBirth: dob,
                 password: password
             })
         });

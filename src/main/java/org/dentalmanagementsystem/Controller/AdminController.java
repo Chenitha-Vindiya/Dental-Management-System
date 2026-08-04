@@ -2,7 +2,9 @@ package org.dentalmanagementsystem.Controller;
 
 import lombok.RequiredArgsConstructor;
 import org.dentalmanagementsystem.Entity.Admin;
+import org.dentalmanagementsystem.Entity.Patient;
 import org.dentalmanagementsystem.Service.AdminService;
+import org.dentalmanagementsystem.Service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuthService authService;
 
     // Triggered by submitNewAdmin() in JS
     @PostMapping("/create")
@@ -84,5 +87,18 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile");
         }
+    }
+
+    @PostMapping("/add-patient")
+    public ResponseEntity<?> addPatientByAdmin(@RequestBody Patient patient) {
+
+        // 1. Give them a secure random dummy password (they can never guess this)
+        patient.setPassword(java.util.UUID.randomUUID().toString());
+
+        // 2. Mark them as NOT verified
+        patient.setVerified(false);
+
+        authService.registerNewPatient(patient);
+        return ResponseEntity.ok(Map.of("status", "SUCCESS"));
     }
 }
