@@ -3,10 +3,12 @@ package org.dentalmanagementsystem.Controller;
 import lombok.RequiredArgsConstructor;
 import org.dentalmanagementsystem.Entity.Admin;
 import org.dentalmanagementsystem.Entity.Patient;
+import org.dentalmanagementsystem.Repository.AdminRepository;
 import org.dentalmanagementsystem.Service.AdminService;
 import org.dentalmanagementsystem.Service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -18,6 +20,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AuthService authService;
+    private final AdminRepository adminRepository;
 
     // Triggered by submitNewAdmin() in JS
     @PostMapping("/create")
@@ -100,5 +103,49 @@ public class AdminController {
 
         authService.registerNewPatient(patient);
         return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+    }
+
+    // 2. UPDATE PASSWORD
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> request) {
+        try {
+            String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            Admin existingAdmin = adminRepository.findByEmail(currentEmail);
+
+            if (existingAdmin == null) {
+                return ResponseEntity.badRequest().body("User not found.");
+            }
+
+            // Update only the password
+            existingAdmin.setPassword(request.get("password"));
+            adminRepository.save(existingAdmin);
+
+            return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to update password.");
+        }
+    }
+
+    // 3. DEACTIVATE ACCOUNT
+    @PostMapping("/deactivate")
+    public ResponseEntity<?> deactivateAccount() {
+        try {
+            String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            Admin existingAdmin = adminRepository.findByEmail(currentEmail);
+
+            if (existingAdmin != null) {
+                // Security Block: Prevent the primary Super Admin from deactivating themselves
+                if (existingAdmin.getId() == 1L) {
+                    return ResponseEntity.badRequest().body("The primary Super Admin account cannot be deactivated.");
+                }
+
+                existingAdmin.setActive(false);
+                adminRepository.save(existingAdmin);
+                return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+            }
+            return ResponseEntity.badRequest().body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

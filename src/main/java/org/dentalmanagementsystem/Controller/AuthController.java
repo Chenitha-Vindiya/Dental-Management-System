@@ -35,7 +35,11 @@ public class AuthController {
         if (email.toLowerCase().endsWith("@admin.com")) {
             Admin admin = adminRepository.findByEmail(email);
             if (admin != null) {
-                // Admin exists, ask for password
+                // ADD THIS BLOCK: Block Deactivated Admins
+                if (!admin.getActive()) {
+                    return ResponseEntity.ok(Map.of("status", "DEACTIVATED_ADMIN"));
+                }
+                // Admin exists and is active, ask for password
                 return ResponseEntity.ok(Map.of("status", "EXISTS_ADMIN"));
             } else {
                 // Admins cannot register themselves! Block it.
@@ -46,6 +50,9 @@ public class AuthController {
         // 2. IF NOT ADMIN, IT MUST BE A PATIENT
         Patient patient = patientRepository.findByEmail(email);
         if (patient != null) {
+//            if (!patient.isActive()) {
+//                return ResponseEntity.ok(Map.of("status", "DEACTIVATED_PATIENT"));
+//            }
             // NEW: Check the boolean flag instead of the password
             if (patient.isVerified()) {
                 return ResponseEntity.ok(Map.of("status", "EXISTS")); // Normal login
@@ -115,6 +122,9 @@ public class AuthController {
             Admin admin = adminRepository.findByEmail(email);
             if (admin != null && admin.getPassword().equals(password)) {
 
+                if (!admin.getActive()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Your account has been deactivated. Please contact a Super Admin.");
+                }
                 // --- CREATE THE SPRING SECURITY SESSION ---
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));

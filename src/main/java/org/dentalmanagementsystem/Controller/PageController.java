@@ -32,7 +32,8 @@ public class PageController {
     }
 
     @GetMapping("/dashboard")
-    public String showPatientDashboard() {
+    public String showPatientDashboard(Model model) {
+        model.addAttribute("activePage", "dashboard");
         return "patient/dashboard";
     }
 

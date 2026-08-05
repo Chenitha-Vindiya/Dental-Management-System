@@ -5,212 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraDent - Patient Dashboard</title>
 
-    <!-- Google Fonts: Manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet">
+    <!-- Link to our newly created global patient CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
 
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #f9f9ff 0%, #e7eeff 50%, #d8e3fb 100%);
-            --primary-color: #005ab7;
-            --primary-hover: #0072e5;
-            --text-color: #111c2d;
-            --text-muted: #414754;
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --shadow-ambient: 0 20px 50px -10px rgba(0, 90, 183, 0.15);
-            --transition-speed: 0.3s;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Manrope', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            background: var(--bg-gradient);
-            color: var(--text-color);
-            position: relative;
-            overflow-x: hidden;
-            display: flex;
-        }
-
-        body::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Ambient Background Orbs */
-        .ambient-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
-        }
-
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: rgba(0, 90, 183, 0.2);
-            top: -100px;
-            left: -100px;
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: rgba(109, 144, 255, 0.15);
-            bottom: -150px;
-            right: -100px;
-        }
-
-        .orb-3 {
-            width: 300px;
-            height: 300px;
-            background: rgba(109, 144, 255, 0.1);
-            top: 20%;
-            right: 10%;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-right: 1px solid var(--glass-border);
-            height: 100vh;
-            padding: 32px 24px;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 10;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary-color);
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 48px;
-        }
-
-        .brand .material-symbols-outlined {
-            font-size: 32px;
-            font-variation-settings: 'FILL' 1;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex: 1;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all var(--transition-speed);
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 90, 183, 0.05);
-            color: var(--primary-color);
-        }
-
-        .nav-item.active {
-            background: var(--primary-color);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px;
-            background: rgba(220, 38, 38, 0.1);
-            color: #dc2626;
-            border-radius: 16px;
-            text-decoration: none;
-            font-weight: 600;
-            margin-top: auto;
-            transition: all var(--transition-speed);
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-            color: #ffffff;
-        }
-
-        /* Main Content */
+        /* Main Content Specific Styles */
         .main-content {
-            margin-left: 280px;
             flex: 1;
             padding: 48px;
             max-width: 1200px;
+            width: 100%;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
             margin-bottom: 40px;
         }
 
-        .header-title h1 {
+        .header h1 {
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 8px;
         }
 
-        .header-title p {
+        .header p {
             color: var(--text-muted);
             font-size: 15px;
-        }
-
-        .profile-badge {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 8px 16px 8px 8px;
-            border-radius: 9999px;
-            backdrop-filter: blur(12px);
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
         }
 
         /* Dashboard Grid */
@@ -297,39 +121,6 @@
             background: var(--primary-hover);
             transform: translateY(-2px);
         }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-                padding: 16px 24px;
-                border-right: none;
-                border-bottom: 1px solid var(--glass-border);
-            }
-
-            .brand {
-                margin-bottom: 0;
-            }
-
-            .nav-menu, .logout-btn {
-                display: none;
-            }
-
-            /* Hide on mobile for demo */
-            body {
-                flex-direction: column;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 24px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -339,51 +130,15 @@
 <div class="ambient-orb orb-2"></div>
 <div class="ambient-orb orb-3"></div>
 
-<!-- Sidebar -->
-<nav class="sidebar">
-    <div class="brand">
-        <span class="material-symbols-outlined icon-fill">qr_code_2</span>
-        <span>AuraDent</span>
-    </div>
-
-    <div class="nav-menu">
-        <a href="#" class="nav-item active">
-            <span class="material-symbols-outlined">dashboard</span>
-            Dashboard
-        </a>
-        <a href="#" class="nav-item">
-            <span class="material-symbols-outlined">event</span>
-            Appointments
-        </a>
-        <a href="#" class="nav-item">
-            <span class="material-symbols-outlined">description</span>
-            Dental Records
-        </a>
-        <a href="#" class="nav-item">
-            <span class="material-symbols-outlined">payments</span>
-            Billing
-        </a>
-    </div>
-
-    <a href="/auth" class="logout-btn">
-        <span class="material-symbols-outlined">logout</span>
-        Sign Out
-    </a>
-</nav>
+<!-- Sidebar injected via Thymeleaf -->
+<div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
 
 <!-- Main Content -->
 <main class="main-content">
     <div class="header">
-        <div class="header-title">
-            <h1>Welcome back!</h1>
-            <p>Here is an overview of your dental profile.</p>
-        </div>
-        <div class="profile-badge">
-            <div class="avatar">SJ</div>
-            <span style="font-weight: 600; font-size: 14px;">Sarah Jenkins</span>
-            <span class="material-symbols-outlined"
-                  style="color: var(--text-muted); cursor: pointer;">expand_more</span>
-        </div>
+        <!-- Dynamic Greeting using Thymeleaf -->
+        <h1>Welcome back, <span th:text="${patient != null ? #strings.arraySplit(patient.fullName, ' ')[0] : 'Sarah'}">Sarah</span>!</h1>
+        <p>Here is an overview of your dental profile.</p>
     </div>
 
     <div class="dashboard-grid">
@@ -422,17 +177,17 @@
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05);">
+                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">add_circle</span>
-                    Book New Appointment
+                    <span style="color: var(--text-color); font-weight: 600;">Book New Appointment</span>
                 </a>
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05);">
+                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">download</span>
-                    Download Latest X-Rays
+                    <span style="color: var(--text-color); font-weight: 600;">Download Latest X-Rays</span>
                 </a>
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05);">
+                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">receipt_long</span>
-                    Pay Outstanding Balance
+                    <span style="color: var(--text-color); font-weight: 600;">Pay Outstanding Balance</span>
                 </a>
             </div>
         </div>

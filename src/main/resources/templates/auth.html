@@ -418,7 +418,8 @@
         <div class="input-group">
             <label style="text-align: center;">Enter the 6-digit code sent to</label>
             <!-- Added dynamic email display -->
-            <p id="displaySentEmail" style="text-align: center; font-weight: 700; color: var(--primary-color); margin-bottom: 16px; font-size: 15px;"></p>
+            <p id="displaySentEmail"
+               style="text-align: center; font-weight: 700; color: var(--primary-color); margin-bottom: 16px; font-size: 15px;"></p>
 
             <div class="otp-container" id="otpContainer">
                 <input type="text" class="otp-box" maxlength="1" oninput="moveToNext(this, event)"
@@ -529,9 +530,19 @@
 
         if (data.status === 'EXISTS' || data.status === 'EXISTS_ADMIN') {
             showStep('stepPassword', 'Sign in to your account');
+
+        } else if (data.status === 'DEACTIVATED_ADMIN') {
+            emailErrorDiv.innerText = "Your account has been deactivated. Please contact a Super Admin.";
+            emailErrorDiv.style.display = 'block';
+
+        } else if (data.status === 'DEACTIVATED_PATIENT') {
+            emailErrorDiv.innerText = "Your account has been deactivated. Please contact support.";
+            emailErrorDiv.style.display = 'block';
+
         } else if (data.status === 'UNAUTHORIZED_ADMIN') {
             emailErrorDiv.innerText = "This admin account does not exist. Please contact the Super Admin.";
             emailErrorDiv.style.display = 'block';
+
         } else if (data.status === 'NEEDS_PASSWORD') {
 
             // NEW LOGIC: Admin created this user, they only need to set a password
@@ -708,7 +719,7 @@
         const response = await fetch('/api/auth/set-password', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email: currentEmail, password: password })
+            body: JSON.stringify({email: currentEmail, password: password})
         });
 
         if (response.ok) {
@@ -771,12 +782,11 @@
         });
 
         if (response.ok) {
-            // Get the JSON response from the server
             const data = await response.json();
-            // Redirect to whatever dashboard the backend tells us to!
             window.location.href = data.redirect;
         } else {
-            messageText.innerText = "Incorrect password. Please try again.";
+            const errorText = await response.text();
+            messageText.innerText = errorText || "Incorrect password. Please try again.";
             banner.style.display = 'flex';
         }
     }
