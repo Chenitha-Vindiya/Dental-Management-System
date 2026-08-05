@@ -136,8 +136,8 @@
 <!-- Main Content -->
 <main class="main-content">
     <div class="header">
-        <!-- Dynamic Greeting using Thymeleaf -->
-        <h1>Welcome back, <span th:text="${patient != null ? #strings.arraySplit(patient.fullName, ' ')[0] : 'Sarah'}">Sarah</span>!</h1>
+        <!-- Dynamic Greeting -->
+        <h1>Welcome back, <span th:text="${patient != null ? #strings.arraySplit(patient.fullName, ' ')[0] : 'Patient'}">Sarah</span>!</h1>
         <p>Here is an overview of your dental profile.</p>
     </div>
 
@@ -153,20 +153,33 @@
                     Next Appointment
                 </div>
             </div>
-            <div class="appointment-details">
-                <div class="appointment-time">10:30 AM</div>
-                <div class="appointment-date">Thursday, October 15, 2026</div>
+
+            <!-- CONDITION 1: If an appointment exists -->
+            <div class="appointment-details" th:if="${nextAppointment != null}">
+                <!-- Formatting the LocalDateTime -->
+                <div class="appointment-time" th:text="${#temporals.format(nextAppointment.dateTime, 'hh:mm a')}">10:30 AM</div>
+                <div class="appointment-date" th:text="${#temporals.format(nextAppointment.dateTime, 'EEEE, MMMM d, yyyy')}">Thursday, October 15, 2026</div>
                 <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
-                    <strong>Type:</strong> Routine Checkup & Cleaning<br>
-                    <strong>Dentist:</strong> Dr. Michael Chen
+                    <strong>Type:</strong> <span th:text="${nextAppointment.type}">Routine Checkup & Cleaning</span><br>
+                    <strong>Dentist:</strong> <span th:text="${nextAppointment.dentistName}">Dr. Michael Chen</span>
                 </p>
                 <button class="btn-action">
                     Reschedule
                 </button>
             </div>
+
+            <!-- CONDITION 2: If no appointment exists (Empty State) -->
+            <div class="appointment-details" th:unless="${nextAppointment != null}" style="text-align: center; padding: 32px 20px; background: transparent; border: 1px dashed rgba(0,0,0,0.1);">
+                <span class="material-symbols-outlined" style="font-size: 40px; color: var(--text-muted); opacity: 0.5; margin-bottom: 8px;">event_busy</span>
+                <p style="color: var(--text-muted); font-weight: 600; font-size: 15px;">No upcoming appointments</p>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">You are all caught up!</p>
+                <a href="/appointments/book" class="btn-action" style="background: var(--card-bg); color: var(--primary-color); border: 1px solid var(--primary-color);">
+                    Book Now
+                </a>
+            </div>
         </div>
 
-        <!-- Quick Actions Card -->
+        <!-- Quick Actions Card (Static links updated with Thymeleaf syntax) -->
         <div class="glass-card">
             <div class="card-header">
                 <div class="card-title">
@@ -177,15 +190,15 @@
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
+                <a th:href="@{/appointments/book}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">add_circle</span>
                     <span style="color: var(--text-color); font-weight: 600;">Book New Appointment</span>
                 </a>
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
+                <a th:href="@{/records}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">download</span>
                     <span style="color: var(--text-color); font-weight: 600;">Download Latest X-Rays</span>
                 </a>
-                <a href="#" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
+                <a th:href="@{/billing}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">receipt_long</span>
                     <span style="color: var(--text-color); font-weight: 600;">Pay Outstanding Balance</span>
                 </a>

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -31,18 +32,62 @@ public class PageController {
         return "auth";
     }
 
+    // --- PATIENT ROUTES ---
+
     @GetMapping("/dashboard")
-    public String showPatientDashboard(Model model) {
+    public String showPatientDashboard(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth";
+        }
+
+        String email = principal.getName();
+        Patient patient = patientRepository.findByEmail(email);
+
+        // Prevent Thymeleaf crash if session is crossed
+        if (patient == null) {
+            return "redirect:/logout";
+        }
+
         model.addAttribute("activePage", "dashboard");
+        model.addAttribute("patient", patient);
+        model.addAttribute("nextAppointment", null); // Passing null for testing the empty state
+
         return "patient/dashboard";
     }
 
+    @GetMapping("/profile")
+    public String showPatientProfile(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        Patient patient = patientRepository.findByEmail(principal.getName());
+
+        // Prevent Thymeleaf crash if session is crossed
+        if (patient == null) {
+            return "redirect:/logout";
+        }
+
+        model.addAttribute("activePage", "profile");
+        model.addAttribute("patient", patient);
+        return "patient/profile";
+    }
+
+
+    // --- ADMIN ROUTES ---
+
     @GetMapping("/admin/dashboard")
-    public String showAdminDashboard(Model model) {
-        // 1. Fetch all admins from the database
+    public String showAdminDashboard(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        Admin admin = adminRepository.findByEmail(principal.getName());
+
+        // Prevent Thymeleaf crash if a Patient session hits this route
+        if (admin == null) {
+            return "redirect:/logout";
+        }
+
         List<Admin> admins = adminRepository.findAll();
         long totalPatients = patientRepository.count();
-        // 2. Add the list to the Model so Thymeleaf can read it
+
         model.addAttribute("totalPatients", totalPatients);
         model.addAttribute("admins", admins);
         model.addAttribute("activePage", "dashboard");
@@ -51,28 +96,35 @@ public class PageController {
     }
 
     @GetMapping("/admin/manage-admins")
-    public String showAdminManagementPage(Model model) {
-        // Fetch all admins to display in the table
+    public String showAdminManagementPage(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        Admin admin = adminRepository.findByEmail(principal.getName());
+
+        // Prevent Thymeleaf crash if a Patient session hits this route
+        if (admin == null) {
+            return "redirect:/logout";
+        }
+
         List<Admin> admins = adminRepository.findAll();
         model.addAttribute("admins", admins);
         model.addAttribute("activePage", "manage-admins");
-
-        // Fetch the currently logged-in admin's email and add it to the model
-        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        model.addAttribute("currentUserEmail", currentUserEmail);
+        model.addAttribute("currentUserEmail", principal.getName());
 
         return "admin/admin-management";
     }
 
     @GetMapping("/admin/profile")
-    public String showAdminProfile(Model model) {
-        // Get the currently logged-in user's email from Spring Security
-        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+    public String showAdminProfile(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
 
-        // Fetch the admin object from the database
-        Admin admin = adminRepository.findByEmail(email);
+        Admin admin = adminRepository.findByEmail(principal.getName());
 
-        // Add the object to the model so Thymeleaf can read it
+        // Prevent Thymeleaf crash if a Patient session hits this route
+        if (admin == null) {
+            return "redirect:/logout";
+        }
+
         model.addAttribute("admin", admin);
         model.addAttribute("activePage", "profile");
 
@@ -80,14 +132,20 @@ public class PageController {
     }
 
     @GetMapping("/admin/patients-management")
-    public String showPatientManagementPage(Model model) {
+    public String showPatientManagementPage(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        Admin admin = adminRepository.findByEmail(principal.getName());
+
+        // Prevent Thymeleaf crash if a Patient session hits this route
+        if (admin == null) {
+            return "redirect:/logout";
+        }
+
         List<Patient> patients = patientRepository.findAll();
         model.addAttribute("patients", patients);
-
         model.addAttribute("activePage", "patients");
-
-        String currentUserEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        model.addAttribute("currentUserEmail", currentUserEmail);
+        model.addAttribute("currentUserEmail", principal.getName());
 
         return "admin/patient-management";
     }
