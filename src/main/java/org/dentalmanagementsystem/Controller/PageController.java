@@ -5,6 +5,7 @@ import org.dentalmanagementsystem.Entity.Admin;
 import org.dentalmanagementsystem.Entity.Patient;
 import org.dentalmanagementsystem.Repository.AdminRepository;
 import org.dentalmanagementsystem.Repository.PatientRepository;
+import org.dentalmanagementsystem.Service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,9 @@ public class PageController {
 
     @Autowired
     private PatientRepository patientRepository;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -53,6 +57,28 @@ public class PageController {
         model.addAttribute("nextAppointment", null); // Passing null for testing the empty state
 
         return "patient/dashboard";
+    }
+
+    // Add this mapping to your existing PageController
+    @GetMapping("/appointments")
+    public String showPatientAppointments(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        Patient patient = patientRepository.findByEmail(principal.getName());
+
+        // Prevent Thymeleaf crash if session is crossed
+        if (patient == null) {
+            return "redirect:/logout";
+        }
+
+        model.addAttribute("patient", patient);
+        model.addAttribute("activePage", "appointments");
+
+        // Pass the categorized lists to the view
+        model.addAttribute("upcomingAppointments", appointmentService.getUpcomingAppointments(patient));
+        model.addAttribute("pastAppointments", appointmentService.getPastAppointments(patient));
+
+        return "patient/appointments";
     }
 
     @GetMapping("/profile")

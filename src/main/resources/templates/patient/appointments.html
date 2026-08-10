@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Appointments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Global Patient Sidebar & Layout CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        /* Main Content Adjustments */
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all var(--transition-speed);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all var(--transition-speed);
+            cursor: pointer;
+        }
+        .btn-outline:hover { background: rgba(0,0,0,0.05); }
+
+        .btn-danger-outline { color: #dc2626; border-color: rgba(220, 38, 38, 0.2); }
+        .btn-danger-outline:hover { background: rgba(220, 38, 38, 0.05); }
+
+        /* Appointment Cards */
+        .appointment-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 48px; }
+        .appointment-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-ambient);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+            transition: transform var(--transition-speed);
+        }
+        .appointment-card:hover { transform: translateY(-2px); }
+
+        .date-badge {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .date-month { font-size: 13px; text-transform: uppercase; font-weight: 700; color: var(--primary-color); letter-spacing: 1px; margin-bottom: 4px; }
+        .date-day { font-size: 32px; font-weight: 800; color: var(--text-color); line-height: 1; }
+        .date-time { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 8px; }
+
+        .appointment-info { flex: 1; min-width: 250px; }
+        .appointment-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-UPCOMING { background: #e0e7ff; color: #3730a3; }
+        .status-COMPLETED { background: #dcfce7; color: #166534; }
+        .status-CANCELLED { background: #fee2e2; color: #991b1b; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .info-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .info-item .material-symbols-outlined { font-size: 18px; color: var(--primary-color); }
+        .appointment-actions { display: flex; gap: 12px; }
+
+        /* Empty State */
+        .empty-state {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px dashed rgba(0,0,0,0.15);
+            border-radius: 24px;
+            padding: 64px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 48px;
+        }
+        .empty-icon {
+            width: 80px; height: 80px; background: rgba(0, 90, 183, 0.05); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 24px; color: var(--primary-color);
+        }
+        .empty-icon .material-symbols-outlined { font-size: 40px; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+            opacity: 0; transition: opacity var(--transition-speed);
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: var(--glass-bg); backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 32px; width: 100%; max-width: 440px; box-shadow: var(--shadow-ambient);
+            transform: translateY(20px); transition: transform var(--transition-speed);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; transition: 0.2s; }
+        .close-btn:hover { color: #dc2626; transform: rotate(90deg); }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
+        .input-wrapper select, .input-wrapper input {
+            width: 100%; padding: 14px 16px; border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1); background: rgba(255, 255, 255, 0.9);
+            font-size: 14px; outline: none; transition: all 0.3s;
+        }
+        .input-wrapper select:focus, .input-wrapper input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1); }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div class="header-title">
+            <h1>My Appointments</h1>
+            <p>Manage your upcoming visits and view your past booking history.</p>
+        </div>
+        <button class="btn-primary" onclick="openBookModal()">
+            <span class="material-symbols-outlined">add</span> Book Appointment
+        </button>
+    </div>
+
+    <!-- UPCOMING VISITS SECTION -->
+    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+        <span class="material-symbols-outlined" style="color: var(--primary-color);">event_upcoming</span> Upcoming Visits
+    </h2>
+
+    <!-- Dynamic Populated State -->
+    <div class="appointment-list" th:if="${not #lists.isEmpty(upcomingAppointments)}">
+        <div class="appointment-card" th:each="appt : ${upcomingAppointments}">
+            <div class="date-badge">
+                <div class="date-month" th:text="${#temporals.format(appt.dateTime, 'MMM')}">Oct</div>
+                <div class="date-day" th:text="${#temporals.format(appt.dateTime, 'dd')}">15</div>
+                <div class="date-time" th:text="${#temporals.format(appt.dateTime, 'hh:mm a')}">10:30 AM</div>
+            </div>
+            <div class="appointment-info">
+                <h3>
+                    <span th:text="${appt.type}">Routine Checkup</span>
+                    <span class="status-badge" th:classappend="'status-' + ${appt.status}" th:text="${appt.status}">Upcoming</span>
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="material-symbols-outlined">dentistry</span>
+                        <span th:text="${appt.dentistName}">Dr. Name</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="material-symbols-outlined">timer</span>
+                        <span th:text="${appt.durationMinutes} + ' Minutes'">45 Minutes</span>
+                    </div>
+                </div>
+            </div>
+            <div class="appointment-actions">
+                <button class="btn-outline btn-danger-outline">Cancel</button>
+                <button class="btn-outline">Reschedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${#lists.isEmpty(upcomingAppointments)}">
+        <div class="empty-icon"><span class="material-symbols-outlined">event_busy</span></div>
+        <h3 style="font-size: 20px; margin-bottom: 8px;">No upcoming appointments</h3>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">You have no scheduled visits at the moment.</p>
+        <button class="btn-outline" onclick="openBookModal()">Find an available time</button>
+    </div>
+
+
+    <!-- PAST VISITS SECTION -->
+    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+        <span class="material-symbols-outlined" style="color: var(--text-muted);">history</span> Past Appointments
+    </h2>
+
+    <div class="appointment-list" th:if="${not #lists.isEmpty(pastAppointments)}">
+        <div class="appointment-card" th:each="appt : ${pastAppointments}" style="opacity: 0.8;">
+            <div class="date-badge" style="background: rgba(0,0,0,0.03);">
+                <div class="date-month" style="color: var(--text-muted);" th:text="${#temporals.format(appt.dateTime, 'MMM')}">Oct</div>
+                <div class="date-day" th:text="${#temporals.format(appt.dateTime, 'dd')}">15</div>
+                <div class="date-time" th:text="${#temporals.format(appt.dateTime, 'yyyy')}">2023</div>
+            </div>
+            <div class="appointment-info">
+                <h3>
+                    <span th:text="${appt.type}">Routine Checkup</span>
+                    <span class="status-badge" th:classappend="'status-' + ${appt.status}" th:text="${appt.status}">Completed</span>
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item"><span class="material-symbols-outlined">dentistry</span> <span th:text="${appt.dentistName}">Dr. Name</span></div>
+                    <div class="info-item"><span class="material-symbols-outlined">timer</span> <span th:text="${appt.durationMinutes} + ' Minutes'">45 Minutes</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(pastAppointments)}">
+        <div class="empty-icon" style="background: rgba(0,0,0,0.03); color: var(--text-muted);"><span class="material-symbols-outlined">history_toggle_off</span></div>
+        <h3 style="font-size: 20px; margin-bottom: 8px;">No past appointments</h3>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">You haven't had any dental visits with us yet.</p>
+    </div>
+
+</main>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">edit_calendar</span> Book Appointment</h2>
+            <button class="close-btn" onclick="closeBookModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="input-group">
+            <label>Service Type</label>
+            <div class="input-wrapper">
+                <select id="apptType">
+                    <option value="" disabled selected>Select a service</option>
+                    <option value="Routine Checkup & Cleaning">Routine Checkup & Cleaning</option>
+                    <option value="Tooth Extraction">Tooth Extraction</option>
+                    <option value="Teeth Whitening">Teeth Whitening</option>
+                    <option value="Root Canal Consultation">Root Canal Consultation</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Preferred Dentist</label>
+            <div class="input-wrapper">
+                <select id="apptDentist">
+                    <option value="" disabled selected>Select a dentist</option>
+                    <option value="Dr. Michael Chen">Dr. Michael Chen</option>
+                    <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins</option>
+                    <option value="Dr. Emily Thorne">Dr. Emily Thorne</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Date & Time</label>
+            <div class="input-wrapper">
+                <input type="datetime-local" id="apptDateTime">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+            <button class="btn-outline" onclick="closeBookModal()">Cancel</button>
+            <button class="btn-primary" onclick="submitBooking()">Confirm Booking</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openBookModal() {
+        document.getElementById('bookModal').classList.add('active');
+    }
+
+    function closeBookModal() {
+        document.getElementById('bookModal').classList.remove('active');
+    }
+
+    async function submitBooking() {
+        const type = document.getElementById('apptType').value;
+        const dentist = document.getElementById('apptDentist').value;
+        const dateTimeInput = document.getElementById('apptDateTime').value;
+
+        if (!type || !dentist || !dateTimeInput) {
+            alert("Please fill in all fields to book an appointment.");
+            return;
+        }
+
+        const payload = {
+            type: type,
+            dentistName: dentist,
+            dateTime: dateTimeInput
+        };
+
+        try {
+            const response = await fetch('/api/appointments/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                closeBookModal();
+                window.location.reload();
+            } else {
+                const errorMsg = await response.text();
+                alert("Failed to book appointment: " + errorMsg);
+            }
+        } catch (error) {
+            alert("Network error. Please try again later.");
+        }
+    }
+</script>
+</body>
+</html>

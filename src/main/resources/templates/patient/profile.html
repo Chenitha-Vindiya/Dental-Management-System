@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Profile</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet">
+
+    <!-- Global Patient Sidebar & Layout CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Profile Layout Grid */
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--shadow-ambient);
+        }
+
+        /* Left Column Overview */
+        .profile-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-avatar-large {
+            width: 96px;
+            height: 96px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 12px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Meta List */
+        .profile-meta-list {
+            width: 100%;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .meta-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0, 90, 183, 0.05);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meta-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .meta-value {
+            font-size: 14px;
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        /* Right Column Forms */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Security Action Row */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .action-row .action-info h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .action-row .action-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 28, 45, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-ambient);
+            transform: translateY(20px);
+            transition: transform var(--transition-speed);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #dc2626;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
+
+<main class="main-content">
+    <div class="header">
+        <h1>My Profile</h1>
+        <p>Manage your personal information, contact details, and account security.</p>
+    </div>
+
+    <div class="profile-layout">
+
+        <!-- LEFT COLUMN: Overview -->
+        <div class="glass-card profile-overview">
+            <div class="profile-avatar-large" th:text="${#strings.substring(patient.fullName, 0, 1)}">S</div>
+            <h2 th:text="${patient.fullName}" style="font-size: 20px; margin-bottom: 4px;">Sarah Jenkins</h2>
+            <p th:text="${patient.email}" style="font-size: 14px; color: var(--text-muted);">sarah@email.com</p>
+            <span class="badge-status">Active Patient</span>
+
+            <div class="profile-meta-list">
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">call</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Phone Number</span>
+                        <span class="meta-value"
+                              th:text="${patient.phoneNumber != null ? patient.phoneNumber : 'Not provided'}">+94 77 000 0000</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">verified_user</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Account Verification</span>
+                        <span class="meta-value"
+                              th:text="${patient.verified ? 'Verified Account' : 'Pending Verification'}"
+                              th:style="${patient.verified ? 'color: #166534;' : 'color: #ca8a04;'}">Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Forms -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- Personal Info Section -->
+            <div class="glass-card">
+                <h3 class="section-title"><span class="material-symbols-outlined">person</span> Personal Information
+                </h3>
+
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper"><input type="text" id="profileName" th:value="${patient.fullName}"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <div class="input-wrapper"><input type="tel" id="profilePhone" th:value="${patient.phoneNumber}">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" th:value="${patient.email}" readonly
+                               style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;"
+                               title="Email cannot be changed directly">
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="promptSaveProfile()">
+                        <span class="material-symbols-outlined">save</span> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="glass-card">
+                <h3 class="section-title"><span class="material-symbols-outlined">security</span> Account & Security
+                </h3>
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4>Account Password</h4>
+                        <p>Update your password to keep your account secure.</p>
+                    </div>
+                    <button class="btn-outline" onclick="openModal('passwordModal')">Change Password</button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0;">
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4 style="color: #dc2626;">Deactivate Account</h4>
+                        <p>Suspend your account and remove dashboard access.</p>
+                    </div>
+                    <button class="btn-danger" onclick="promptDeactivate()">Deactivate</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">lock_reset</span> Change Password</h2>
+            <button class="close-btn" onclick="closeModal('passwordModal')"><span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div id="passwordErrorBanner"
+             style="display: none; align-items: center; gap: 8px; background-color: #fff3f3; border: 1px solid #ffcdd2; color: #d32f2f; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">error</span>
+            <span id="passwordErrorMessage">Error message goes here.</span>
+        </div>
+
+        <div class="input-group">
+            <label>New Password</label>
+            <div class="input-wrapper"><input type="password" id="newPassword" placeholder="Enter new password"></div>
+        </div>
+        <div class="input-group">
+            <label>Confirm New Password</label>
+            <div class="input-wrapper"><input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+        </div>
+        <div class="btn-row" style="margin-top: 32px;">
+            <button class="btn-outline" onclick="closeModal('passwordModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitPasswordChange()">Update Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- GLOBAL CONFIRMATION MODAL -->
+<div class="modal-overlay" id="globalConfirmModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="confirmTitle"><span class="material-symbols-outlined">help</span> Confirm Action</h2>
+            <button class="close-btn" onclick="closeGlobalConfirm()"><span
+                    class="material-symbols-outlined">close</span></button>
+        </div>
+        <p id="confirmMessage"
+           style="color: var(--text-muted); font-size: 15px; margin-bottom: 24px; line-height: 1.5;">
+            Are you sure you want to proceed?
+        </p>
+        <div class="btn-row">
+            <button class="btn-outline" onclick="closeGlobalConfirm()">Cancel</button>
+            <button id="confirmActionBtn" class="btn-primary" onclick="executeConfirmCallback()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- MODAL CONTROLS ---
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // --- GLOBAL CONFIRMATION SYSTEM ---
+    let currentConfirmCallback = null;
+
+    function openGlobalConfirm(title, message, btnText, isDanger, callback) {
+        document.getElementById('confirmTitle').innerHTML = `<span class="material-symbols-outlined">${isDanger ? 'warning' : 'help'}</span> ${title}`;
+        document.getElementById('confirmMessage').innerText = message;
+
+        const actionBtn = document.getElementById('confirmActionBtn');
+        actionBtn.innerText = btnText;
+        actionBtn.className = isDanger ? 'btn-danger' : 'btn-primary';
+
+        currentConfirmCallback = callback;
+        openModal('globalConfirmModal');
+    }
+
+    function closeGlobalConfirm() {
+        closeModal('globalConfirmModal');
+        currentConfirmCallback = null;
+    }
+
+    function executeConfirmCallback() {
+        if (currentConfirmCallback) currentConfirmCallback();
+        closeGlobalConfirm();
+    }
+
+    // --- ACTION LOGIC PROMPTS ---
+
+    // 1. Prompt Save Profile
+    function promptSaveProfile() {
+        const name = document.getElementById('profileName').value;
+        const phone = document.getElementById('profilePhone').value;
+
+        if (!name) return alert("Full Name is required.");
+
+        openGlobalConfirm(
+            "Save Changes?",
+            "Are you sure you want to update your profile information?",
+            "Save Changes",
+            false,
+            async () => {
+                const response = await fetch('/api/patient/profile/info', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({fullName: name, phoneNumber: phone})
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert("Update Error: " + await response.text());
+                }
+            }
+        );
+    }
+
+    // 2. Submit Password Change (Inline Error)
+    async function submitPasswordChange() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorBanner = document.getElementById('passwordErrorBanner');
+        const errorMessage = document.getElementById('passwordErrorMessage');
+
+        const showError = (msg) => {
+            errorMessage.innerText = msg;
+            errorBanner.style.display = 'flex';
+        };
+        errorBanner.style.display = 'none';
+
+        if (!newPassword || !confirmPassword) return showError("Please fill in both fields.");
+        if (newPassword !== confirmPassword) return showError("Passwords do not match.");
+
+        try {
+            const response = await fetch('/api/patient/profile/password', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: newPassword})
+            });
+
+            if (response.ok) {
+                closeModal('passwordModal');
+                alert("Password updated successfully! Please log in again.");
+                window.location.href = "/logout";
+            } else {
+                showError("Error: " + await response.text());
+            }
+        } catch (error) {
+            showError("A network error occurred.");
+        }
+    }
+
+    // 3. Prompt Deactivate Account
+    function promptDeactivate() {
+        openGlobalConfirm(
+            "Deactivate Account",
+            "Are you absolutely sure you want to deactivate your account? You will be logged out immediately.",
+            "Deactivate",
+            true,
+            async () => {
+                const response = await fetch('/api/patient/profile/deactivate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                if (response.ok) {
+                    alert("Your account has been deactivated.");
+                    window.location.href = "/login";
+                } else {
+                    alert("Action failed: " + await response.text());
+                }
+            }
+        );
+    }
+</script>
+</body>
+</html>
