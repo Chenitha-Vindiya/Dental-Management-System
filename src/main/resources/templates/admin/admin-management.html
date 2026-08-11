@@ -86,7 +86,7 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .avatar {
+        .admin-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -255,7 +255,8 @@
             color: var(--text-color);
         }
 
-        .input-wrapper input, .input-wrapper select {
+        /* Apply glass styling to standard inputs and the new addon wrapper */
+        .input-wrapper input, .input-wrapper select, .email-addon-wrapper input {
             width: 100%;
             padding: 12px 16px;
             border-radius: 12px;
@@ -266,9 +267,18 @@
             transition: all 0.3s;
         }
 
-        .input-wrapper input:focus, .input-wrapper select:focus {
+        .input-wrapper input:focus, .input-wrapper select:focus, .email-addon-wrapper input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        /* Specific Add-on for Email Domain */
+        .email-addon-wrapper { display: flex; align-items: stretch; }
+        .email-addon-wrapper input { border-radius: 12px 0 0 12px; border-right: none; }
+        .email-addon-wrapper .domain-addon {
+            background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-left: none;
+            border-radius: 0 12px 12px 0; padding: 0 16px; display: flex; align-items: center;
+            color: var(--text-muted); font-weight: 600; font-size: 14px; white-space: nowrap;
         }
 
         .submit-btn {
@@ -334,7 +344,7 @@
                             <!-- Generates an avatar with initials based on the admin's full name -->
                             <img th:src="@{https://ui-avatars.com/api/(name=${admin.fullName}, background='random', bold='true')}"
                                  alt="Profile"
-                                 class="avatar">
+                                 class="admin-avatar">
 
                             <span th:text="${admin.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
                         </div>
@@ -347,7 +357,7 @@
                     </td>
                     <td>
                         <span th:if="${admin.active}"
-                              style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                              style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px; min-width: 110px;">
                             <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active
                         </span>
                         <span th:unless="${admin.active}"
@@ -372,7 +382,7 @@
                             </button>
                             <button th:unless="${admin.active}" class="action-btn activate" title="Activate Admin"
                                     th:onclick="|toggleAdminStatus(${admin.id}, true)|">
-                                <span class="material-symbols-outlined">restore</span>
+                                <span class="material-symbols-outlined">settings_backup_restore</span>
                             </button>
                         </div>
 
@@ -405,10 +415,16 @@
             <label>Full Name</label>
             <div class="input-wrapper"><input type="text" id="newAdminName" placeholder="e.g. Dr. Sarah Jenkins"></div>
         </div>
+
+        <!-- SPECIAL DOMAIN INPUT -->
         <div class="input-group">
-            <label>Email Address</label>
-            <div class="input-wrapper"><input type="email" id="newAdminEmail" placeholder="name@admin.com"></div>
+            <label>Work Email</label>
+            <div class="email-addon-wrapper">
+                <input type="text" id="newAdminEmailPrefix" placeholder="sarah.jenkins">
+                <div class="domain-addon">@admin.com</div>
+            </div>
         </div>
+
         <div class="input-group">
             <label>Password</label>
             <div class="input-wrapper"><input type="password" id="newAdminPassword" placeholder="Secure password"></div>
@@ -445,8 +461,11 @@
             <div class="input-wrapper"><input type="text" id="editAdminName"></div>
         </div>
         <div class="input-group">
-            <label>Email Address</label>
-            <div class="input-wrapper"><input type="email" id="editAdminEmail"></div>
+            <label>Work Email</label>
+            <div class="email-addon-wrapper">
+                <input type="text" id="editAdminEmailPrefix">
+                <div class="domain-addon">@admin.com</div>
+            </div>
         </div>
         <div class="input-group">
             <label>Assign Role</label>
@@ -474,7 +493,7 @@
         // Clear inputs if it's the add modal
         if (modalId === 'addAdminModal') {
             document.getElementById('newAdminName').value = '';
-            document.getElementById('newAdminEmail').value = '';
+            document.getElementById('newAdminEmailPrefix').value = '';
             document.getElementById('newAdminPassword').value = '';
         }
     }
@@ -489,25 +508,23 @@
 
     // --- CREATE ADMIN ---
     async function submitNewAdmin() {
-        const name = document.getElementById('newAdminName').value;
-        const email = document.getElementById('newAdminEmail').value;
+        const name = document.getElementById('newAdminName').value.trim();
+        const emailPrefix = document.getElementById('newAdminEmailPrefix').value.trim();
         const password = document.getElementById('newAdminPassword').value;
         const role = document.getElementById('newAdminRole').value;
 
-        if (!name || !email || !password) {
+        if (!name || !emailPrefix || !password) {
             alert("Please fill in all fields.");
             return;
         }
 
-        if (!email.toLowerCase().endsWith("@admin.com")) {
-            alert("Security Error: Admin emails must use the @admin.com domain.");
-            return;
-        }
+        // Piece together the email prefix and the mandatory domain
+        const fullEmail = emailPrefix + "@admin.com";
 
         const response = await fetch('/api/admin/create', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({fullName: name, email: email, password: password, role: role})
+            body: JSON.stringify({fullName: name, email: fullEmail, password: password, role: role})
         });
 
         if (response.ok) {
@@ -521,7 +538,6 @@
     // --- OPEN EDIT MODAL & FETCH DATA ---
     async function openEditModal(adminId) {
         try {
-            // Fetch the existing admin details from the database
             const response = await fetch(`/api/admin/${adminId}`);
             if (response.ok) {
                 const admin = await response.json();
@@ -529,8 +545,11 @@
                 // Populate the form fields
                 document.getElementById('editAdminId').value = admin.id;
                 document.getElementById('editAdminName').value = admin.fullName;
-                document.getElementById('editAdminEmail').value = admin.email;
                 document.getElementById('editAdminRole').value = admin.role;
+
+                // Extract just the prefix before the @ sign for the custom input
+                const emailPrefix = admin.email.split('@')[0];
+                document.getElementById('editAdminEmailPrefix').value = emailPrefix;
 
                 // Open the modal
                 document.getElementById('editAdminModal').classList.add('active');
@@ -545,26 +564,24 @@
     // --- SUBMIT EDIT CHANGES ---
     async function submitEditAdmin() {
         const id = document.getElementById('editAdminId').value;
-        const name = document.getElementById('editAdminName').value;
-        const email = document.getElementById('editAdminEmail').value;
+        const name = document.getElementById('editAdminName').value.trim();
+        const emailPrefix = document.getElementById('editAdminEmailPrefix').value.trim();
         const role = document.getElementById('editAdminRole').value;
 
-        if (!name || !email) {
+        if (!name || !emailPrefix) {
             alert("Name and Email are required.");
             return;
         }
 
-        if (!email.toLowerCase().endsWith("@admin.com")) {
-            alert("Security Error: Admin emails must use the @admin.com domain.");
-            return;
-        }
+        // Piece together the email prefix and the mandatory domain
+        const fullEmail = emailPrefix + "@admin.com";
 
         const response = await fetch(`/api/admin/${id}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 fullName: name,
-                email: email,
+                email: fullEmail,
                 role: role
             })
         });

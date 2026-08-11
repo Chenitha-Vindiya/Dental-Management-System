@@ -60,7 +60,7 @@
             text-align: center;
         }
 
-        .avatar {
+        .profile-avatar {
             width: 96px;
             height: 96px;
             background: rgba(0, 90, 183, 0.1);
@@ -348,7 +348,7 @@
 
         <!-- LEFT COLUMN: Profile Overview with Meta Data -->
         <div class="glass-card profile-overview">
-            <div class="avatar" th:text="${#strings.substring(admin.fullName, 0, 1)}">A</div>
+            <div class="profile-avatar" th:text="${#strings.substring(admin.fullName, 0, 1)}">A</div>
             <h2 th:text="${admin.fullName}" style="font-size: 20px; margin-bottom: 4px;">Admin Name</h2>
             <p th:text="${admin.email}" style="font-size: 14px; color: var(--text-muted);">admin@auradent.com</p>
             <span class="badge" th:classappend="${#strings.toLowerCase(#strings.replace(admin.role, '_', '-'))}"
@@ -424,7 +424,7 @@
                         <p>Secure your account with a strong, random password.</p>
                     </div>
                     <button class="btn-outline" onclick="openModal('passwordModal')">
-                        <span class="material-symbols-outlined">key</span> Change Password
+                        Change Password
                     </button>
                 </div>
 
@@ -436,7 +436,7 @@
                         <p>Once deactivated, you will lose access to the dashboard immediately.</p>
                     </div>
                     <button class="btn-danger" onclick="promptDeactivate()">
-                        <span class="material-symbols-outlined">no_accounts</span> Deactivate
+                        Deactivate
                     </button>
                 </div>
             </div>

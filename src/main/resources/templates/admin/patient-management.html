@@ -86,7 +86,7 @@
                 border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             }
 
-            .avatar {
+            .patient-avatar {
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
@@ -298,14 +298,14 @@
                         <td>
                             <div class="user-profile-cell">
                                 <img th:src="@{https://ui-avatars.com/api/(name=${patient.fullName}, background='random', bold='true')}"
-                                     alt="Profile" class="avatar">
+                                     alt="Profile" class="patient-avatar">
                                 <span th:text="${patient.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
                             </div>
                         </td>
                         <td th:text="${patient.email}">email@patient.com</td>
                         <td th:text="${patient.phoneNumber}">+94 77 123 4567</td>
                         <td>
-                            <span style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                            <span style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px; min-width: 110px;">
                                 <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active
                             </span>
                         </td>

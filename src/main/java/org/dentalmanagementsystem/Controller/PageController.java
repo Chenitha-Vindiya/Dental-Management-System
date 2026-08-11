@@ -6,6 +6,7 @@ import org.dentalmanagementsystem.Entity.Patient;
 import org.dentalmanagementsystem.Repository.AdminRepository;
 import org.dentalmanagementsystem.Repository.PatientRepository;
 import org.dentalmanagementsystem.Service.AppointmentService;
+import org.dentalmanagementsystem.Service.DentistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +26,9 @@ public class PageController {
 
     @Autowired
     private AppointmentService appointmentService;
+
+    @Autowired
+    private DentistService dentistService;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -174,5 +178,21 @@ public class PageController {
         model.addAttribute("currentUserEmail", principal.getName());
 
         return "admin/patient-management";
+    }
+
+    // Add this underneath your existing Admin routes in PageController
+    @GetMapping("/admin/manage-dentists")
+    public String showDentistManagementPage(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        // Use the extractEmail helper if you applied the Google Login fix earlier
+        Admin admin = adminRepository.findByEmail(principal.getName());
+        if (admin == null) return "redirect:/logout";
+
+        model.addAttribute("dentists", dentistService.getAllDentists());
+        model.addAttribute("activePage", "manage-dentists");
+        model.addAttribute("currentUserEmail", admin.getEmail());
+
+        return "admin/dentist-management";
     }
 }

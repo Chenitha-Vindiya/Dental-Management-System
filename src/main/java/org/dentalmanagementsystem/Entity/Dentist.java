@@ -13,36 +13,26 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "appointments")
-public class Appointment {
+@Table(name = "dentists")
+public class Dentist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
+    @Column(nullable = false)
+    private String fullName;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    private String phoneNumber;
 
     @Column(nullable = false)
-    private String type;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dentist_id", nullable = false)
-    private Dentist dentist;
+    private String specialization = "General Dentistry";
 
     @Column(nullable = false)
-    private LocalDateTime dateTime;
-
-    @Column(nullable = false)
-    private Integer durationMinutes = 45;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AppointmentStatus status = AppointmentStatus.UPCOMING;
-
-    @Column(columnDefinition = "TEXT")
-    private String notes;
+    private Boolean active = true;
 
     @CreationTimestamp
     @Column(updatable = false)

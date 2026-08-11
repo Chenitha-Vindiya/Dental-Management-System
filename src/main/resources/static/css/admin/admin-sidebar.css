@@ -43,21 +43,8 @@ body::-webkit-scrollbar {
     z-index: -1;
 }
 
-.orb-1 {
-    width: 500px;
-    height: 500px;
-    background: rgba(0, 90, 183, 0.15);
-    top: -100px;
-    left: 200px;
-}
-
-.orb-2 {
-    width: 600px;
-    height: 600px;
-    background: rgba(109, 144, 255, 0.15);
-    bottom: -150px;
-    right: -50px;
-}
+.orb-1 { width: 500px; height: 500px; background: rgba(0, 90, 183, 0.15); top: -100px; left: 200px; }
+.orb-2 { width: 600px; height: 600px; background: rgba(109, 144, 255, 0.15); bottom: -150px; right: -50px; }
 
 /* Sidebar - Unified & Clean */
 .sidebar {
@@ -113,17 +100,9 @@ body::-webkit-scrollbar {
     transition: opacity 0.2s ease;
 }
 
-.brand-icon-wrapper .hover-icon {
-    opacity: 0;
-}
-
-/* Swap icons on hover */
-.brand-icon-wrapper:hover .default-icon {
-    opacity: 0;
-}
-.brand-icon-wrapper:hover .hover-icon {
-    opacity: 1;
-}
+.brand-icon-wrapper .hover-icon { opacity: 0; }
+.brand-icon-wrapper:hover .default-icon { opacity: 0; }
+.brand-icon-wrapper:hover .hover-icon { opacity: 1; }
 
 /* Navigation Links Layout */
 .nav-links {
@@ -157,8 +136,78 @@ body::-webkit-scrollbar {
     box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
 }
 
-.nav-item.logout {
+/* Sidebar Bottom Actions (Profile + Logout) */
+.sidebar-bottom-actions {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all var(--transition-speed);
+    white-space: nowrap;
+}
+
+.profile-btn:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 90, 183, 0.1);
+}
+
+.profile-btn.active {
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+    border-color: transparent;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.profile-btn.active .avatar {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.profile-role {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.profile-btn.active .profile-role {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-item.logout {
     color: #dc2626;
 }
 
@@ -176,11 +225,12 @@ body::-webkit-scrollbar {
     opacity: 1;
 }
 
-/* Hide text smoothly when collapsed */
+/* Hide text smoothly and center everything when collapsed */
 .brand-text, .nav-text {
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, width 0.2s ease;
     white-space: nowrap;
     opacity: 1;
+    overflow: hidden;
 }
 
 .sidebar.collapsed .brand-text,
@@ -189,10 +239,35 @@ body::-webkit-scrollbar {
     width: 0;
     visibility: hidden;
     pointer-events: none;
+    margin: 0;
 }
 
-.sidebar.collapsed .nav-item {
+.sidebar.collapsed .brand {
     justify-content: center;
-    padding: 14px;
     gap: 0;
+}
+
+/* Force perfect 48x48 squares for alignment */
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .logout {
+    padding: 12px;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    gap: 0;
+}
+
+/* Specific fix for the profile button */
+.sidebar.collapsed .profile-btn {
+    padding: 4px; /* 40px avatar + 8px padding = 48px perfect square */
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    gap: 0;
+}
+
+.sidebar.collapsed .avatar {
+    margin: 0;
 }
