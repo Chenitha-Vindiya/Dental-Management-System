@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${status != null ? status + ' - ' + error : 'Error'}">Error</title>
+
+    <style>
+        /* --- CSS Reset & Variables --- */
+        :root {
+            --background: #0a0a0b;
+            --foreground: #fafafa;
+            --muted-foreground: #a1a1aa;
+            --card: #18181b;
+            --border: #27272a;
+            --primary: #ffffff;
+            --primary-foreground: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Layout --- */
+        .stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 5rem 1.5rem;
+            text-align: center;
+            width: 100%;
+            min-height: 520px;
+        }
+
+        /* --- Glitch Effect Styles --- */
+        .glitch-container {
+            position: relative;
+            user-select: none;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.05em;
+            font-size: clamp(5rem, 18vw, 11rem);
+            cursor: default;
+        }
+
+        .glitch-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            mix-blend-mode: screen;
+            transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glitch-red {
+            color: #ff0040;
+        }
+
+        .glitch-cyan {
+            color: #00e5ff;
+        }
+
+        /* Hover interactions */
+        .glitch-container:hover .glitch-red {
+            transform: translateX(3px);
+            opacity: 0.7;
+        }
+
+        .glitch-container:hover .glitch-cyan {
+            transform: translateX(-3px);
+            opacity: 0.7;
+        }
+
+        .glitch-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Typography & Info --- */
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .description {
+            max-w: 24rem;
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        /* --- Actions / Buttons --- */
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            height: 2.5rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .btn-primary:hover {
+            background-color: #e5e5e5;
+        }
+
+        .btn-secondary {
+            background-color: var(--card);
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<section class="stage">
+
+    <!-- GLITCH CONTAINER -->
+    <div class="glitch-container">
+        <!--
+           Thymeleaf dynamically injects the HTTP status code here.
+           If accessed without Spring, it defaults to '404'.
+        -->
+        <span aria-hidden="true" class="glitch-layer glitch-red js-scramble" th:text="${status ?: '404'}">404</span>
+        <span aria-hidden="true" class="glitch-layer glitch-cyan js-scramble" th:text="${status ?: '404'}">404</span>
+        <h1 class="glitch-text js-scramble" id="error-code" th:text="${status ?: '404'}">404</h1>
+    </div>
+
+    <!-- INFO CONTAINER -->
+    <div class="info-container">
+        <!-- Dynamically injects the error name (e.g. "Not Found", "Internal Server Error") -->
+        <p class="title" th:text="${error ?: 'Page not found'}">Page not found</p>
+        <!-- Dynamically injects the detailed error message -->
+        <p class="description" th:text="${message ?: 'The page you are looking for does not exist or has been moved.'}">
+            The page you are looking for does not exist or has been moved.
+        </p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <a href="/" class="btn btn-primary">Go home</a>
+        <a href="javascript:history.back()" class="btn btn-secondary">Go back</a>
+    </div>
+
+</section>
+
+<!-- --- Vanilla JS Scramble Logic --- -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/\\[]{}";
+        const SCRAMBLE_MS = 700;
+        const TICK_MS = 45;
+
+        // Check if user prefers reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function runScramble(element) {
+            // Store original text
+            const finalString = element.innerText.trim();
+
+            if (prefersReducedMotion || !finalString) return;
+
+            const chars = finalString.split("");
+            const start = performance.now();
+            let last = 0;
+            let rafId;
+
+            const loop = (now) => {
+                if (now - last >= TICK_MS) {
+                    last = now;
+
+                    const progress = Math.min((now - start) / SCRAMBLE_MS, 1);
+                    const settled = Math.floor(progress * chars.length);
+
+                    element.innerText = chars.map((ch, i) => {
+                        if (i < settled || ch === " ") {
+                            return ch;
+                        }
+                        return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+                    }).join("");
+                }
+
+                if (now - start < SCRAMBLE_MS) {
+                    rafId = requestAnimationFrame(loop);
+                } else {
+                    element.innerText = finalString; // Ensure it ends perfectly
+                    cancelAnimationFrame(rafId);
+                }
+            };
+
+            rafId = requestAnimationFrame(loop);
+        }
+
+        // Target all layers of the glitch effect and scramble them on load
+        const scrambleElements = document.querySelectorAll('.js-scramble');
+        scrambleElements.forEach(el => runScramble(el));
+    });
+</script>
+</body>
+</html>
