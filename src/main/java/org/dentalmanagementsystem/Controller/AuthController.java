@@ -1,11 +1,14 @@
 package org.dentalmanagementsystem.Controller;
 
 import org.dentalmanagementsystem.Entity.Admin;
+import org.dentalmanagementsystem.Entity.Dentist;
 import org.dentalmanagementsystem.Repository.AdminRepository;
+import org.dentalmanagementsystem.Repository.DentistRepository;
 import org.dentalmanagementsystem.Repository.PatientRepository;
 import org.dentalmanagementsystem.Service.AuthService;
 import org.dentalmanagementsystem.Entity.Patient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +26,17 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
-    private final PatientRepository patientRepository;
-    private final AdminRepository adminRepository;
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
+    private DentistRepository dentistRepository;
 
     @PostMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestBody Map<String, String> request) {
@@ -44,6 +55,19 @@ public class AuthController {
             } else {
                 // Admins cannot register themselves! Block it.
                 return ResponseEntity.ok(Map.of("status", "UNAUTHORIZED_ADMIN"));
+            }
+        }
+
+        // NEW BLOCK: Check for Dentist
+        if (email.toLowerCase().endsWith("@dentist.com")) {
+            Dentist dentist = dentistRepository.findByEmail(email);
+            if (dentist != null) {
+                if (!dentist.isActive()) {
+                    return ResponseEntity.ok(Map.of("status", "DEACTIVATED_DENTIST"));
+                }
+                return ResponseEntity.ok(Map.of("status", "EXISTS_DENTIST"));
+            } else {
+                return ResponseEntity.ok(Map.of("status", "UNAUTHORIZED_DENTIST"));
             }
         }
 
@@ -138,6 +162,31 @@ public class AuthController {
                 return ResponseEntity.ok(Map.of("redirect", "/admin/dashboard"));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid admin credentials");
+        }
+
+        // NEW BLOCK: DENTIST LOGIN LOGIC
+        if (email.toLowerCase().endsWith("@dentist.com")) {
+            Dentist dentist = dentistRepository.findByEmail(email);
+            if (dentist != null && dentist.getPassword().equals(password)) {
+
+                if (!dentist.isActive()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Your account is deactivated.");
+                }
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_DENTIST")));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                HttpSession session = request.getSession(true);
+                session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+                
+                if (dentist.getConsultationFee() == null || dentist.getConsultationFee() <= 0) {
+                    dentist.setConsultationFee(2500.00);
+                }
+
+                return ResponseEntity.ok(Map.of("redirect", "/dentist/dashboard"));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid dentist credentials");
         }
 
         // 2. PATIENT LOGIN LOGIC
