@@ -344,7 +344,19 @@
 
         <!-- LEFT COLUMN: Overview -->
         <div class="glass-card profile-overview">
-            <div class="profile-avatar-large" th:text="${#strings.substring(patient.fullName, 0, 1)}">S</div>
+
+            <!-- Render image if Google Picture exists -->
+            <img th:if="${patient.profilePicture != null}"
+                 th:src="${patient.profilePicture}"
+                 alt="Profile Picture"
+                 class="profile-avatar-large"
+                 style="object-fit: cover; border: none;">
+
+            <!-- Render initial if no picture exists -->
+            <div th:unless="${patient.profilePicture != null}"
+                 class="profile-avatar-large"
+                 th:text="${#strings.substring(patient.fullName, 0, 1)}">S</div>
+
             <h2 th:text="${patient.fullName}" style="font-size: 20px; margin-bottom: 4px;">Sarah Jenkins</h2>
             <p th:text="${patient.email}" style="font-size: 14px; color: var(--text-muted);">sarah@email.com</p>
             <span class="badge-status">Active Patient</span>

@@ -23,18 +23,30 @@
             <span class="material-symbols-outlined">description</span>
             <span class="nav-text">Dental Records</span>
         </a>
-        <a th:href="@{/billing}" class="nav-item" th:classappend="${activePage == 'billing'} ? 'active' : ''">
+        <a th:href="@{/payment}" class="nav-item" th:classappend="${activePage == 'payment'} ? 'active' : ''">
             <span class="material-symbols-outlined">payments</span>
-            <span class="nav-text">Billing</span>
+            <span class="nav-text">Payments</span>
         </a>
     </nav>
 
     <!-- Bottom Actions Wrapper (Profile + Logout) -->
     <div class="sidebar-bottom-actions">
 
-        <!-- Profile Button (Kept as before) -->
+        <!-- Profile Button -->
         <a th:href="@{/profile}" class="profile-btn">
-            <div class="avatar" th:text="${patient != null ? #strings.substring(patient.fullName, 0, 1) : 'S'}">S</div>
+
+            <!-- Render image if Google Picture exists -->
+            <img th:if="${patient != null and patient.profilePicture != null}"
+                 th:src="${patient.profilePicture}"
+                 alt="Avatar"
+                 class="avatar"
+                 style="object-fit: cover;">
+
+            <!-- Render initial if no picture exists -->
+            <div th:unless="${patient != null and patient.profilePicture != null}"
+                 class="avatar"
+                 th:text="${patient != null ? #strings.substring(patient.fullName, 0, 1) : 'S'}">S</div>
+
             <div class="profile-info nav-text">
                 <span class="profile-name" th:text="${patient != null ? patient.fullName : 'Sarah Jenkins'}">Sarah Jenkins</span>
                 <span class="profile-role">Patient Profile</span>

@@ -37,4 +37,6 @@ public class Patient {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    private String profilePicture;
 }

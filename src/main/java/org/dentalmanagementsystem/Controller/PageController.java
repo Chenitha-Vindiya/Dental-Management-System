@@ -1,11 +1,8 @@
 package org.dentalmanagementsystem.Controller;
 
 
-import org.dentalmanagementsystem.Entity.Admin;
-import org.dentalmanagementsystem.Entity.Patient;
-import org.dentalmanagementsystem.Repository.AdminRepository;
-import org.dentalmanagementsystem.Repository.PatientRepository;
-import org.dentalmanagementsystem.Service.AppointmentService;
+import org.dentalmanagementsystem.Entity.*;
+import org.dentalmanagementsystem.Repository.*;
 import org.dentalmanagementsystem.Service.DentistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,10 +22,16 @@ public class PageController {
     private PatientRepository patientRepository;
 
     @Autowired
-    private AppointmentService appointmentService;
+    private DentistService dentistService;
 
     @Autowired
-    private DentistService dentistService;
+    private DentistRepository dentistRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private PaymentRecordRepository paymentRecordRepository;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -63,27 +66,39 @@ public class PageController {
         return "patient/dashboard";
     }
 
-    // Add this mapping to your existing PageController
     @GetMapping("/appointments")
     public String showPatientAppointments(Model model, Principal principal) {
-        if (principal == null) return "redirect:/auth";
-
+        // Fetch the logged-in patient
         Patient patient = patientRepository.findByEmail(principal.getName());
-
-        // Prevent Thymeleaf crash if session is crossed
-        if (patient == null) {
-            return "redirect:/logout";
-        }
-
         model.addAttribute("patient", patient);
         model.addAttribute("activePage", "appointments");
 
-        // Pass the categorized lists to the view
-        model.addAttribute("upcomingAppointments", appointmentService.getUpcomingAppointments(patient));
-        model.addAttribute("pastAppointments", appointmentService.getPastAppointments(patient));
+        // Fetch all active dentists for the booking modal dropdown
+        List<Dentist> dentists = dentistRepository.findAll().stream()
+                .filter(Dentist::isActive)
+                .toList(); // Use .collect(Collectors.toList()) if on older Java versions
+        model.addAttribute("dentists", dentists);
+
+        // Fetch the patient's appointment history for the data table
+        List<Appointment> appointments = appointmentRepository.findByPatientIdOrderByAppointmentDateDescStartTimeDesc(patient.getId());
+        model.addAttribute("appointments", appointments);
 
         return "patient/appointments";
     }
+
+    @GetMapping("/payment")
+    public String viewPatientBilling(Model model, Principal principal) {
+        Patient patient = patientRepository.findByEmail(principal.getName());
+        model.addAttribute("patient", patient);
+        model.addAttribute("activePage", "payment");
+
+        // Fetch payment records associated with the patient's appointments
+        List<PaymentRecord> payments = paymentRecordRepository.findByAppointmentPatientIdOrderByCreatedAtDesc(patient.getId());
+        model.addAttribute("payments", payments);
+
+        return "patient/payment";
+    }
+
 
     @GetMapping("/profile")
     public String showPatientProfile(Model model, Principal principal) {
@@ -194,5 +209,31 @@ public class PageController {
         model.addAttribute("currentUserEmail", admin.getEmail());
 
         return "admin/dentist-management";
+    }
+
+    // --- DENTIST ROUTES ---
+
+    @GetMapping("/dentist/dashboard")
+    public String viewDashboard(Model model, Principal principal) {
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        model.addAttribute("dentist", dentist);
+        model.addAttribute("activePage", "dashboard");
+        return "dentist/dentist-dashboard";
+    }
+
+    @GetMapping("/dentist/appointments")
+    public String viewAppointments(Model model, Principal principal) {
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        model.addAttribute("dentist", dentist);
+        model.addAttribute("activePage", "appointments");
+        return "dentist/appointments";
+    }
+
+    @GetMapping("/dentist/profile")
+    public String viewProfile(Model model, Principal principal) {
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        model.addAttribute("dentist", dentist);
+        model.addAttribute("activePage", "profile");
+        return "dentist/dentist-profile";
     }
 }
