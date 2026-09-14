@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -24,25 +26,27 @@ public class Appointment {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @Column(nullable = false)
-    private String type;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dentist_id", nullable = false)
     private Dentist dentist;
 
     @Column(nullable = false)
-    private LocalDateTime dateTime;
+    private LocalDate appointmentDate;
 
     @Column(nullable = false)
-    private Integer durationMinutes = 45;
+    private LocalTime startTime;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AppointmentStatus status = AppointmentStatus.UPCOMING;
+    private LocalTime endTime;
+
+    @Column(nullable = false)
+    private String serviceType;
 
     @Column(columnDefinition = "TEXT")
-    private String notes;
+    private String patientNotes;
+
+    @Column(nullable = false)
+    private String status = "SCHEDULED"; // SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -50,4 +54,7 @@ public class Appointment {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PaymentRecord payment;
 }

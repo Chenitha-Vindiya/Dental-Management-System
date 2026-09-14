@@ -1,19 +1,23 @@
 package org.dentalmanagementsystem.Repository;
 
 import org.dentalmanagementsystem.Entity.Appointment;
-import org.dentalmanagementsystem.Entity.AppointmentStatus;
-import org.dentalmanagementsystem.Entity.Patient;
+import org.dentalmanagementsystem.Entity.Dentist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // Finds upcoming appointments sorted by closest date first
-    List<Appointment> findByPatientAndStatusOrderByDateTimeAsc(Patient patient, AppointmentStatus status);
+    // Used by the generation algorithm to filter out taken slots
+    List<Appointment> findByDentistAndAppointmentDateAndStatusNot(Dentist dentist, LocalDate date, String status);
 
-    // Finds past (completed/cancelled) appointments sorted by most recent first
-    List<Appointment> findByPatientAndStatusNotOrderByDateTimeDesc(Patient patient, AppointmentStatus status);
+    // Used by the controller to prevent double-booking at the exact same millisecond
+    boolean existsByDentistAndAppointmentDateAndStartTimeAndStatusNot(Dentist dentist, LocalDate date, LocalTime startTime, String status);
+
+    // Used by the patient dashboard to display their history
+    List<Appointment> findByPatientIdOrderByAppointmentDateDescStartTimeDesc(Long patientId);
 }
