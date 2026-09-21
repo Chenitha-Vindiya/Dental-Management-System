@@ -156,16 +156,15 @@
 
             <!-- CONDITION 1: If an appointment exists -->
             <div class="appointment-details" th:if="${nextAppointment != null}">
-                <!-- Formatting the LocalDateTime -->
-                <div class="appointment-time" th:text="${#temporals.format(nextAppointment.dateTime, 'hh:mm a')}">10:30 AM</div>
-                <div class="appointment-date" th:text="${#temporals.format(nextAppointment.dateTime, 'EEEE, MMMM d, yyyy')}">Thursday, October 15, 2026</div>
+                <div class="appointment-time" th:text="${#temporals.format(nextAppointment.startTime, 'hh:mm a')}">10:30 AM</div>
+                <div class="appointment-date" th:text="${#temporals.format(nextAppointment.appointmentDate, 'EEEE, MMMM d, yyyy')}">Thursday, October 15, 2026</div>
                 <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
-                    <strong>Type:</strong> <span th:text="${nextAppointment.type}">Routine Checkup & Cleaning</span><br>
-                    <strong>Dentist:</strong> <span th:text="${nextAppointment.dentistName}">Dr. Michael Chen</span>
+                    <strong>Type:</strong> <span th:text="${nextAppointment.serviceType}">Routine Checkup & Cleaning</span><br>
+                    <strong>Dentist:</strong> <span th:text="'Dr. ' + ${nextAppointment.dentist.fullName}">Dr. Michael Chen</span>
                 </p>
-                <button class="btn-action">
-                    Reschedule
-                </button>
+                <a th:href="@{/appointments}" class="btn-action">
+                    View Details
+                </a>
             </div>
 
             <!-- CONDITION 2: If no appointment exists (Empty State) -->

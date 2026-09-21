@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -61,7 +62,14 @@ public class PageController {
 
         model.addAttribute("activePage", "dashboard");
         model.addAttribute("patient", patient);
-        model.addAttribute("nextAppointment", null); // Passing null for testing the empty state
+
+        // Fetch the next upcoming scheduled appointment (from today onwards)
+        Appointment nextAppointment = appointmentRepository
+                .findFirstByPatientIdAndStatusAndAppointmentDateGreaterThanEqualOrderByAppointmentDateAscStartTimeAsc(
+                        patient.getId(), "SCHEDULED", LocalDate.now()
+                ).orElse(null);
+
+        model.addAttribute("nextAppointment", nextAppointment);
 
         return "patient/dashboard";
     }

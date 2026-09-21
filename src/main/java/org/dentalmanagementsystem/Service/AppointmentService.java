@@ -83,6 +83,7 @@ public class AppointmentService {
                 String formattedDate = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"));
                 String formattedTime = time.format(DateTimeFormatter.ofPattern("hh:mm a"));
 
+                // Notice the 100%% below instead of 100%
                 String htmlContent = """
                 <!DOCTYPE html>
                 <html>
@@ -92,10 +93,10 @@ public class AppointmentService {
                 </head>
                 <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9ff; color: #111c2d;">
                     
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9ff; padding: 40px 0;">
+                    <table width="100%%" cellpadding="0" cellspacing="0" style="background-color: #f9f9ff; padding: 40px 0;">
                         <tr>
                             <td align="center">
-                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; border: 1px solid #e7eeff; box-shadow: 0 10px 25px rgba(0, 90, 183, 0.05); overflow: hidden; max-width: 550px; margin: 0 auto;">
+                                <table width="100%%" max-width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; border: 1px solid #e7eeff; box-shadow: 0 10px 25px rgba(0, 90, 183, 0.05); overflow: hidden; max-width: 550px; margin: 0 auto;">
                                     
                                     <tr>
                                         <td align="center" style="padding: 32px 24px; border-bottom: 1px solid #f0f3ff;">
@@ -120,7 +121,7 @@ public class AppointmentService {
                                                     <strong>Time:</strong> %s
                                                 </p>
                                                 <p style="margin: 0; font-size: 15px; color: #111c2d;">
-                                                    <strong>Practitioner:</strong> %s
+                                                    <strong>Dentist:</strong> %s
                                                 </p>
                                             </div>
                                             
@@ -148,6 +149,7 @@ public class AppointmentService {
 
                 helper.setText(htmlContent, true);
                 mailSender.send(message);
+                System.out.println("Email sent successfully to " + toEmail);
 
             } catch (MessagingException e) {
                 System.err.println("Failed to send appointment email: " + e.getMessage());

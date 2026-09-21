@@ -20,10 +20,10 @@ public class PaymentService {
     private final PaymentRecordRepository paymentRepository;
 
     // Add these to your application.properties later
-    @Value("${payhere.merchant.id:1234567}")
+    @Value("${payhere.merchant.id:1235928}")
     private String merchantId;
 
-    @Value("${payhere.merchant.secret:YOUR_MERCHANT_SECRET}")
+    @Value("${payhere.merchant.secret:Mzk4MzcyODU5MDM2NzU3MTkzMjY0Njk2NjQxNjkzNjIzOTIzMTU4}")
     private String merchantSecret;
 
     public void uploadBankReceipt(Long paymentId, MultipartFile file) {

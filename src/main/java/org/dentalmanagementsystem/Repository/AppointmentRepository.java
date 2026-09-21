@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -20,4 +21,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Used by the patient dashboard to display their history
     List<Appointment> findByPatientIdOrderByAppointmentDateDescStartTimeDesc(Long patientId);
+
+    Optional<Appointment> findFirstByPatientIdAndStatusAndAppointmentDateGreaterThanEqualOrderByAppointmentDateAscStartTimeAsc(Long patientId, String status, LocalDate currentDate);
 }

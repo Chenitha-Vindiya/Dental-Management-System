@@ -7,7 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Global Patient Sidebar CSS -->
@@ -30,13 +30,15 @@
 
         .header h1 {
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 8px;
+            color: var(--text-color);
         }
 
         .header p {
             color: var(--text-muted);
             font-size: 15px;
+            font-weight: 500;
         }
 
         /* Buttons */
@@ -53,11 +55,13 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
         }
 
         .btn-primary:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 90, 183, 0.3);
         }
 
         .btn-outline {
@@ -76,122 +80,140 @@
             background: rgba(0, 0, 0, 0.05);
         }
 
-        /* Table Styles */
-        .glass-card {
-            background: var(--glass-bg);
+        /* --- NEW PREMIUM CARD LAYOUT --- */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 24px;
-            padding: 32px;
-            box-shadow: var(--shadow-ambient);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: 0.3s ease;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .appointment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 90, 183, 0.08);
+            border-color: rgba(0, 90, 183, 0.2);
         }
 
-        th {
-            text-align: left;
-            padding: 16px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        /* Card Section 1: Date & Time */
+        .apt-date-time {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 220px;
         }
 
-        td {
-            padding: 20px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-color);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        .apt-date-box {
+            background: linear-gradient(135deg, var(--primary-color), #00428a);
+            color: white;
+            border-radius: 16px;
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.25);
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        .apt-date-box .month { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+        .apt-date-box .day { font-size: 26px; font-weight: 800; line-height: 1; margin: 4px 0; }
+
+        .apt-time-details .time { font-size: 16px; font-weight: 800; color: var(--text-color); display: flex; align-items: center; gap: 6px; }
+        .apt-time-details .time .material-symbols-outlined { font-size: 18px; color: var(--primary-color); }
+        .apt-time-details .year { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+        /* Card Section 2: Clinical Details */
+        .apt-details {
+            flex: 1;
+            padding: 0 32px;
+            border-left: 2px dashed rgba(0,0,0,0.06);
+            border-right: 2px dashed rgba(0,0,0,0.06);
+            margin: 0 32px;
         }
+
+        .apt-service { font-size: 18px; font-weight: 800; color: var(--text-color); margin-bottom: 6px; }
+        .apt-dentist { font-size: 14px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .apt-dentist .material-symbols-outlined { font-size: 18px; opacity: 0.7; }
+
+        /* Card Section 3: Status Badges */
+        .apt-status {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            min-width: 180px;
+        }
+
+        .badge-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
+        .badge-label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 
         .status-badge {
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: 700;
-            display: inline-block;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .status-scheduled { background: #e0f2fe; color: #0369a1; }
         .status-completed { background: #dcfce7; color: #166534; }
         .status-cancelled { background: #fee2e2; color: #b91c1c; }
+        .status-payment { background: #f3f4f6; color: #4b5563; border: 1px solid rgba(0,0,0,0.05); }
+
+        /* Empty State */
+        .empty-state {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px);
+            border: 2px dashed rgba(0,0,0,0.1);
+            border-radius: 24px;
+            padding: 64px 32px;
+            text-align: center;
+        }
+
+        /* Responsive Breakpoint for smaller screens */
+        @media (max-width: 900px) {
+            .appointment-card { flex-direction: column; align-items: flex-start; gap: 24px; }
+            .apt-details { border: none; padding: 0; margin: 0; width: 100%; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; }
+            .apt-status { width: 100%; align-items: flex-start; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; }
+        }
 
         /* Modal Styles */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center; z-index: 100;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100; }
         .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
-            border-radius: 24px; padding: 32px; width: 100%; max-width: 750px; box-shadow: var(--shadow-ambient);
-            max-height: 90vh; overflow-y: auto;
-        }
-
+        .modal-content { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; width: 100%; max-width: 750px; box-shadow: var(--shadow-ambient); max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
         .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; }
-
-        /* Wizard Steps */
         .step { display: none; animation: fadeIn 0.4s ease forwards; }
         .step.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Form Inputs */
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
-        .input-wrapper input, .input-wrapper select, .input-wrapper textarea {
-            width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.9); font-size: 14px; outline: none; transition: 0.3s; font-family: 'Manrope', sans-serif;
-        }
-        .input-wrapper input:focus, .input-wrapper select:focus, .input-wrapper textarea:focus {
-            border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
-        }
-
-        /* Custom Calendar Slider */
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.1); background: rgba(255, 255, 255, 0.9); font-size: 14px; outline: none; transition: 0.3s; font-family: 'Manrope', sans-serif; }
+        .input-wrapper input:focus, .input-wrapper select:focus, .input-wrapper textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1); }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: rgba(255,255,255,0.5); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); }
         .static-year { font-weight: 800; font-size: 20px; color: var(--primary-color); }
         .month-toggler { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 16px; }
         .month-toggler button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 8px; transition: 0.2s;}
         .month-toggler button:hover { background: rgba(0,0,0,0.05); color: var(--primary-color); }
-
-        .date-slider {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 12px; -ms-overflow-style: none; scrollbar-width: none;
-        }
+        .date-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 12px; -ms-overflow-style: none; scrollbar-width: none; }
         .date-slider::-webkit-scrollbar { display: none; }
-
-        .date-box {
-            flex: 0 0 calc(20% - 9.6px); scroll-snap-align: start; background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 16px 8px; text-align: center;
-            cursor: pointer; transition: 0.2s; user-select: none;
-        }
+        .date-box { flex: 0 0 calc(20% - 9.6px); scroll-snap-align: start; background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 16px 8px; text-align: center; cursor: pointer; transition: 0.2s; user-select: none; }
         .date-box:hover { border-color: var(--primary-color); transform: translateY(-2px); }
         .date-box.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 8px 16px rgba(0, 90, 183, 0.2); }
-
-        .time-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 24px;
-        }
-        .time-slot {
-            padding: 14px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); text-align: center;
-            cursor: pointer; font-weight: 700; background: rgba(255,255,255,0.9); transition: 0.2s;
-        }
+        .time-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 24px; }
+        .time-slot { padding: 14px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); text-align: center; cursor: pointer; font-weight: 700; background: rgba(255,255,255,0.9); transition: 0.2s; }
         .time-slot:hover { border-color: var(--primary-color); color: var(--primary-color); }
         .time-slot.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-
-        /* Payment Radio Buttons */
-        .payment-option {
-            display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 16px; margin-bottom: 12px; cursor: pointer; background: rgba(255,255,255,0.7); transition: 0.2s;
-        }
+        .payment-option { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; margin-bottom: 12px; cursor: pointer; background: rgba(255,255,255,0.7); transition: 0.2s; }
         .payment-option:hover { background: white; border-color: var(--primary-color); }
         .payment-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary-color); }
         .payment-icon { font-size: 24px; color: var(--primary-color); }
@@ -218,43 +240,61 @@
         </button>
     </div>
 
-    <!-- Appointment List Table -->
-    <div class="glass-card">
-        <table>
-            <thead>
-            <tr>
-                <th>Date & Time</th>
-                <th>Dentist</th>
-                <th>Service</th>
-                <th>Status</th>
-                <th>Payment</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="apt : ${appointments}">
-                <td>
-                    <div style="font-weight: 700; color: var(--primary-color);" th:text="${#temporals.format(apt.appointmentDate, 'MMM dd, yyyy')}">Oct 15, 2026</div>
-                    <div style="font-size: 13px; color: var(--text-muted);" th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">10:30 AM</div>
-                </td>
-                <td th:text="'Dr. ' + ${apt.dentist.fullName}">Dr. Smith</td>
-                <td th:text="${apt.serviceType}">Checkup</td>
-                <td>
+    <!-- Modern Appointment Cards Grid -->
+    <div class="appointment-list">
+
+        <!-- Individual Card -->
+        <div class="appointment-card" th:each="apt : ${appointments}">
+
+            <!-- Date & Time Section -->
+            <div class="apt-date-time">
+                <div class="apt-date-box">
+                    <div class="month" th:text="${#temporals.format(apt.appointmentDate, 'MMM')}">OCT</div>
+                    <div class="day" th:text="${#temporals.format(apt.appointmentDate, 'dd')}">15</div>
+                </div>
+                <div class="apt-time-details">
+                    <div class="time">
+                        <span class="material-symbols-outlined">schedule</span>
+                        <span th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">10:30 AM</span>
+                    </div>
+                    <div class="year" th:text="${#temporals.format(apt.appointmentDate, 'EEEE, yyyy')}">Thursday, 2026</div>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="apt-details">
+                <div class="apt-service" th:text="${apt.serviceType}">Routine Checkup</div>
+                <div class="apt-dentist">
+                    <span class="material-symbols-outlined">dentistry</span>
+                    <span th:text="'Dr. ' + ${apt.dentist.fullName}">Dr. Smith</span>
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="apt-status">
+                <div class="badge-row">
+                    <span class="badge-label">Status</span>
                     <span th:class="'status-badge status-' + ${#strings.toLowerCase(apt.status)}" th:text="${apt.status}">SCHEDULED</span>
-                </td>
-                <td>
-                    <!-- Assuming a linked PaymentRecord entity exists -->
-                    <span th:if="${apt.payment != null}" th:text="${apt.payment.status}">PENDING</span>
-                    <span th:unless="${apt.payment != null}" style="color: var(--text-muted)">N/A</span>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(appointments)}">
-                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                    <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 12px;">event_busy</span>
-                    <br>You have no appointments on record.
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                </div>
+                <div class="badge-row">
+                    <span class="badge-label">Payment</span>
+                    <span th:if="${apt.payment != null}" class="status-badge status-payment" th:text="${apt.payment.status}">PENDING</span>
+                    <span th:unless="${apt.payment != null}" class="status-badge status-payment" style="opacity: 0.6;">N/A</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State (Shows when no appointments exist) -->
+        <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
+            <span class="material-symbols-outlined" style="font-size: 64px; color: var(--primary-color); opacity: 0.4; margin-bottom: 24px;">calendar_month</span>
+            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">No Appointments Yet</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 32px; max-width: 400px; margin-inline: auto;">You do not have any upcoming or past dental visits on record. Book your first consultation today.</p>
+            <button class="btn-primary" onclick="openBookingModal()" style="padding: 14px 32px; font-size: 15px;">
+                <span class="material-symbols-outlined">add_circle</span> Book Consultation
+            </button>
+        </div>
+
     </div>
 </main>
 
