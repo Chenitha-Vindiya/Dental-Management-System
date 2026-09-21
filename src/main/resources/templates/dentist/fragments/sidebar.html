@@ -1,0 +1,65 @@
+<!-- Sidebar -->
+<aside class="sidebar" id="dentistSidebar" th:fragment="dentist-sidebar">
+    <div class="brand">
+        <div class="brand-icon-wrapper" onclick="toggleDentistSidebar()" title="Expand/Collapse Menu">
+            <span class="material-symbols-outlined default-icon">qr_code_2</span>
+            <span class="material-symbols-outlined hover-icon">menu</span>
+        </div>
+        <a th:href="@{/dentist/dashboard}" class="brand-text" style="text-decoration: none">AuraDent</a>
+    </div>
+
+    <!-- Dentist Navigation Links -->
+    <nav class="nav-links">
+        <a th:href="@{/dentist/dashboard}" class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+        <a th:href="@{/dentist/appointments}" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+            <span class="material-symbols-outlined">event</span>
+            <span class="nav-text">My Schedule</span>
+        </a>
+        <a th:href="@{/dentist/patients}" class="nav-item" th:classappend="${activePage == 'patients'} ? 'active' : ''">
+            <span class="material-symbols-outlined">group</span>
+            <span class="nav-text">Patient Records</span>
+        </a>
+    </nav>
+
+    <!-- Bottom Actions Wrapper (Profile + Logout) -->
+    <div class="sidebar-bottom-actions" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+
+        <!-- Profile Button -->
+        <a th:href="@{/dentist/profile}" class="profile-btn" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+
+            <div class="avatar" th:text="${dentist != null ? #strings.substring(dentist.fullName, 0, 1) : 'D'}">D</div>
+
+            <div class="profile-info nav-text">
+                <span class="profile-name" th:text="${dentist != null ? 'Dr. ' + dentist.fullName : 'Dr. Smith'}">Dr. Smith</span>
+                <span class="profile-role" th:text="${dentist != null ? dentist.specialization : 'General Dentistry'}">General Dentistry</span>
+            </div>
+        </a>
+
+        <!-- Logout Button -->
+        <a th:href="@{/logout}" class="nav-item logout">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="nav-text">Sign Out</span>
+        </a>
+    </div>
+
+    <!-- INLINE SCRIPT: Runs instantly to prevent flickering -->
+    <script>
+        if (localStorage.getItem("dentist-sidebar-collapsed") === "true") {
+            document.getElementById('dentistSidebar').classList.add('collapsed');
+        }
+
+        window.toggleDentistSidebar = function() {
+            const sidebar = document.getElementById('dentistSidebar');
+            sidebar.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                localStorage.setItem("dentist-sidebar-collapsed", "true");
+            } else {
+                localStorage.setItem("dentist-sidebar-collapsed", "false");
+            }
+        };
+    </script>
+</aside>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - Account Settings</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+
+    <style>
+        /* Inheriting your global variables from admin-sidebar.css */
+
+        .main-content {
+            flex-grow: 1;
+            padding: 48px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        /* Modern Settings Layout (Grid) */
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 400px minmax(0, 1fr);
+            gap: 32px;
+            width: 100%;
+            align-items: start;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg, rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.8));
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--shadow-ambient, 0 20px 50px -10px rgba(0, 90, 183, 0.15));
+        }
+
+        /* Left Side: Avatar Card */
+        .profile-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 96px;
+            height: 96px;
+            background: rgba(0, 90, 183, 0.1);
+            color: var(--primary-color);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 12px;
+        }
+        .badge.super-admin { background: #e0e7ff; color: #3730a3; }
+        .badge.admin { background: #dcfce7; color: #166534; }
+        .badge.receptionist { background: #fef9c3; color: #854d0e; }
+
+        /* Profile Meta List Styles */
+        .profile-meta-list {
+            width: 100%;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .meta-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 90, 183, 0.05);
+            color: var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meta-icon .material-symbols-outlined { font-size: 20px; }
+
+        .meta-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .meta-value {
+            font-size: 14px;
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        /* Right Side: Settings Sections */
+        .settings-section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 16px;
+        }
+
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        /* Action Buttons */
+        .btn-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+            gap: 12px;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* Combined Actions Row Styles */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        .action-row .action-info h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .action-row .action-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 28, 45, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-ambient);
+            transform: translateY(20px);
+            transition: transform var(--transition-speed);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #dc2626;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
+
+<main class="main-content">
+    <div class="header">
+        <h1>Account Settings</h1>
+        <p style="color: var(--text-muted);">Manage your personal information, security, and account status.</p>
+    </div>
+
+    <div class="settings-layout">
+
+        <!-- LEFT COLUMN: Profile Overview with Meta Data -->
+        <div class="glass-card profile-overview">
+            <div class="profile-avatar" th:text="${#strings.substring(admin.fullName, 0, 1)}">A</div>
+            <h2 th:text="${admin.fullName}" style="font-size: 20px; margin-bottom: 4px;">Admin Name</h2>
+            <p th:text="${admin.email}" style="font-size: 14px; color: var(--text-muted);">admin@auradent.com</p>
+            <span class="badge" th:classappend="${#strings.toLowerCase(#strings.replace(admin.role, '_', '-'))}"
+                  th:text="${#strings.replace(admin.role, '_', ' ')}">ROLE</span>
+
+            <!-- Dynamic Meta List -->
+            <div class="profile-meta-list">
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">calendar_today</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Member Since</span>
+                        <span class="meta-value" th:text="${#temporals.format(admin.createdAt, 'MMM yyyy')}">Aug 2026</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">verified_user</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Account Status</span>
+                        <span class="meta-value" th:text="${admin.active ? 'Active' : 'Inactive'}" th:style="${admin.active ? 'color: #166534;' : 'color: #dc2626;'}">Active</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">shield_person</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Access Level</span>
+                        <span class="meta-value" th:switch="${#strings.toString(admin.role)}">
+                            <span th:case="'SUPER_ADMIN'">Full System Access</span>
+                            <span th:case="'ADMIN'">Administrative Access</span>
+                            <span th:case="'RECEPTIONIST'">Front Desk Access</span>
+                            <span th:case="*">Standard Access</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Settings Sections -->
+        <div class="settings-section-list">
+
+            <!-- SECTION 1: Personal Information -->
+            <div class="glass-card">
+                <h3 class="section-title">
+                    <span class="material-symbols-outlined">person</span> Personal Information
+                </h3>
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="profileName" th:value="${admin.fullName}">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="profileEmail" th:value="${admin.email}" readonly style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;" title="Email cannot be changed directly">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="submit-btn" onclick="promptSaveProfile()">
+                        <span class="material-symbols-outlined">save</span> Save Information
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Account & Security -->
+            <div class="glass-card">
+                <h3 class="section-title">
+                    <span class="material-symbols-outlined">security</span> Account & Security
+                </h3>
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4>Account Password</h4>
+                        <p>Secure your account with a strong, random password.</p>
+                    </div>
+                    <button class="btn-outline" onclick="openModal('passwordModal')">
+                        Change Password
+                    </button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0;">
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4 style="color: #dc2626;">Deactivate Account</h4>
+                        <p>Once deactivated, you will lose access to the dashboard immediately.</p>
+                    </div>
+                    <button class="btn-danger" onclick="promptDeactivate()">
+                        Deactivate
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">lock_reset</span> Change Password</h2>
+            <button class="close-btn" onclick="closeModal('passwordModal')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- NEW: Inline Error Banner -->
+        <div id="passwordErrorBanner" style="display: none; align-items: center; gap: 8px; background-color: #fff3f3; border: 1px solid #ffcdd2; color: #d32f2f; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 500;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">error</span>
+            <span id="passwordErrorMessage">Error message goes here.</span>
+        </div>
+
+        <div class="input-group">
+            <label>New Password</label>
+            <div class="input-wrapper"><input type="password" id="newPassword" placeholder="Enter new secure password"></div>
+        </div>
+        <div class="input-group">
+            <label>Confirm New Password</label>
+            <div class="input-wrapper"><input type="password" id="confirmPassword" placeholder="Confirm your new password"></div>
+        </div>
+        <div class="btn-row" style="margin-top: 32px;">
+            <button class="btn-outline" onclick="closeModal('passwordModal')">Cancel</button>
+            <button class="submit-btn" onclick="submitPasswordChange()">Update Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- GLOBAL CONFIRMATION MODAL -->
+<div class="modal-overlay" id="globalConfirmModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="confirmTitle"><span class="material-symbols-outlined">help</span> Confirm Action</h2>
+            <button class="close-btn" onclick="closeGlobalConfirm()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <p id="confirmMessage" style="color: var(--text-muted); font-size: 15px; margin-bottom: 24px; line-height: 1.5;">
+            Are you sure you want to proceed with this action?
+        </p>
+        <div class="btn-row">
+            <button class="btn-outline" onclick="closeGlobalConfirm()">Cancel</button>
+            <button id="confirmActionBtn" class="submit-btn" onclick="executeConfirmCallback()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- MODAL CONTROLS ---
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // --- GLOBAL CONFIRMATION SYSTEM ---
+    let currentConfirmCallback = null;
+
+    function openGlobalConfirm(title, message, btnText, isDanger, callback) {
+        document.getElementById('confirmTitle').innerHTML = `<span class="material-symbols-outlined">${isDanger ? 'warning' : 'help'}</span> ${title}`;
+        document.getElementById('confirmMessage').innerText = message;
+
+        const actionBtn = document.getElementById('confirmActionBtn');
+        actionBtn.innerText = btnText;
+
+        // Dynamically style the button based on the task
+        if (isDanger) {
+            actionBtn.className = 'btn-danger';
+        } else {
+            actionBtn.className = 'submit-btn';
+        }
+
+        currentConfirmCallback = callback;
+        openModal('globalConfirmModal');
+    }
+
+    function closeGlobalConfirm() {
+        closeModal('globalConfirmModal');
+        currentConfirmCallback = null;
+    }
+
+    function executeConfirmCallback() {
+        if (currentConfirmCallback) {
+            currentConfirmCallback();
+        }
+        closeGlobalConfirm();
+    }
+
+    // --- ACTION LOGIC PROMPTS ---
+
+    // 1. Prompt Save Profile
+    function promptSaveProfile() {
+        const name = document.getElementById('profileName').value;
+        const email = document.getElementById('profileEmail').value;
+        if (!name) return alert("Name is required.");
+
+        openGlobalConfirm(
+            "Save Changes?",
+            "Are you sure you want to update your personal profile information?",
+            "Save Changes",
+            false,
+            async () => {
+                const response = await fetch('/api/admin/profile/info', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ fullName: name, email: email })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert("Update Error: " + await response.text());
+                }
+            }
+        );
+    }
+
+    // 2. Direct Password Update (No Confirmation Prompt, Inline Errors)
+    async function submitPasswordChange() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorBanner = document.getElementById('passwordErrorBanner');
+        const errorMessage = document.getElementById('passwordErrorMessage');
+
+        // Helper function to show error inside the modal
+        const showError = (msg) => {
+            errorMessage.innerText = msg;
+            errorBanner.style.display = 'flex';
+        };
+
+        // Hide banner on new attempt
+        errorBanner.style.display = 'none';
+
+        if (!newPassword || !confirmPassword) {
+            return showError("Please fill in both password fields.");
+        }
+
+        if (newPassword !== confirmPassword) {
+            return showError("Passwords do not match. Please try again.");
+        }
+
+        try {
+            const response = await fetch('/api/admin/password', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ password: newPassword })
+            });
+
+            if (response.ok) {
+                closeModal('passwordModal');
+                window.location.href = "/logout";
+            } else {
+                const errorText = await response.text();
+                showError("Error: " + errorText);
+            }
+        } catch (error) {
+            showError("A network error occurred. Please try again.");
+        }
+    }
+
+    // 3. Prompt Deactivate Account
+    function promptDeactivate() {
+        openGlobalConfirm(
+            "Deactivate Account",
+            "Are you absolutely sure you want to deactivate your account? You will be logged out immediately and this action cannot be reversed without Super Admin intervention.",
+            "Deactivate",
+            true, // This triggers the red btn-danger styling!
+            async () => {
+                const response = await fetch('/api/admin/deactivate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                if (response.ok) {
+                    alert("Your account has been successfully deactivated.");
+                    window.location.href = "/auth";
+                } else {
+                    alert("Action failed: " + await response.text());
+                }
+            }
+        );
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Appointments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Global Patient Sidebar CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 90, 183, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- NEW PREMIUM CARD LAYOUT --- */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 90, 183, 0.08);
+            border-color: rgba(0, 90, 183, 0.2);
+        }
+
+        /* Card Section 1: Date & Time */
+        .apt-date-time {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 220px;
+        }
+
+        .apt-date-box {
+            background: linear-gradient(135deg, var(--primary-color), #00428a);
+            color: white;
+            border-radius: 16px;
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.25);
+        }
+
+        .apt-date-box .month { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+        .apt-date-box .day { font-size: 26px; font-weight: 800; line-height: 1; margin: 4px 0; }
+
+        .apt-time-details .time { font-size: 16px; font-weight: 800; color: var(--text-color); display: flex; align-items: center; gap: 6px; }
+        .apt-time-details .time .material-symbols-outlined { font-size: 18px; color: var(--primary-color); }
+        .apt-time-details .year { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+        /* Card Section 2: Clinical Details */
+        .apt-details {
+            flex: 1;
+            padding: 0 32px;
+            border-left: 2px dashed rgba(0,0,0,0.06);
+            border-right: 2px dashed rgba(0,0,0,0.06);
+            margin: 0 32px;
+        }
+
+        .apt-service { font-size: 18px; font-weight: 800; color: var(--text-color); margin-bottom: 6px; }
+        .apt-dentist { font-size: 14px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .apt-dentist .material-symbols-outlined { font-size: 18px; opacity: 0.7; }
+
+        /* Card Section 3: Status Badges */
+        .apt-status {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            min-width: 180px;
+        }
+
+        .badge-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
+        .badge-label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-scheduled { background: #e0f2fe; color: #0369a1; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-cancelled { background: #fee2e2; color: #b91c1c; }
+        .status-payment { background: #f3f4f6; color: #4b5563; border: 1px solid rgba(0,0,0,0.05); }
+
+        /* Empty State */
+        .empty-state {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px);
+            border: 2px dashed rgba(0,0,0,0.1);
+            border-radius: 24px;
+            padding: 64px 32px;
+            text-align: center;
+        }
+
+        /* Responsive Breakpoint for smaller screens */
+        @media (max-width: 900px) {
+            .appointment-card { flex-direction: column; align-items: flex-start; gap: 24px; }
+            .apt-details { border: none; padding: 0; margin: 0; width: 100%; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; }
+            .apt-status { width: 100%; align-items: flex-start; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; }
+        }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; width: 100%; max-width: 750px; box-shadow: var(--shadow-ambient); max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; }
+        .step { display: none; animation: fadeIn 0.4s ease forwards; }
+        .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.1); background: rgba(255, 255, 255, 0.9); font-size: 14px; outline: none; transition: 0.3s; font-family: 'Manrope', sans-serif; }
+        .input-wrapper input:focus, .input-wrapper select:focus, .input-wrapper textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: rgba(255,255,255,0.5); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); }
+        .static-year { font-weight: 800; font-size: 20px; color: var(--primary-color); }
+        .month-toggler { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 16px; }
+        .month-toggler button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 8px; transition: 0.2s;}
+        .month-toggler button:hover { background: rgba(0,0,0,0.05); color: var(--primary-color); }
+        .date-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 12px; -ms-overflow-style: none; scrollbar-width: none; }
+        .date-slider::-webkit-scrollbar { display: none; }
+        .date-box { flex: 0 0 calc(20% - 9.6px); scroll-snap-align: start; background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 16px 8px; text-align: center; cursor: pointer; transition: 0.2s; user-select: none; }
+        .date-box:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .date-box.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 8px 16px rgba(0, 90, 183, 0.2); }
+        .time-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 24px; }
+        .time-slot { padding: 14px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); text-align: center; cursor: pointer; font-weight: 700; background: rgba(255,255,255,0.9); transition: 0.2s; }
+        .time-slot:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .time-slot.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .payment-option { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; margin-bottom: 12px; cursor: pointer; background: rgba(255,255,255,0.7); transition: 0.2s; }
+        .payment-option:hover { background: white; border-color: var(--primary-color); }
+        .payment-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary-color); }
+        .payment-icon { font-size: 24px; color: var(--primary-color); }
+        .payment-text h4 { margin: 0 0 4px 0; font-size: 15px; }
+        .payment-text p { margin: 0; font-size: 13px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
+
+<main class="main-content">
+    <div class="header">
+        <div>
+            <h1>My Appointments</h1>
+            <p>View your upcoming visits and clinical history.</p>
+        </div>
+        <button class="btn-primary" onclick="openBookingModal()">
+            <span class="material-symbols-outlined">add</span> Book New Appointment
+        </button>
+    </div>
+
+    <!-- Modern Appointment Cards Grid -->
+    <div class="appointment-list">
+
+        <!-- Individual Card -->
+        <div class="appointment-card" th:each="apt : ${appointments}">
+
+            <!-- Date & Time Section -->
+            <div class="apt-date-time">
+                <div class="apt-date-box">
+                    <div class="month" th:text="${#temporals.format(apt.appointmentDate, 'MMM')}">OCT</div>
+                    <div class="day" th:text="${#temporals.format(apt.appointmentDate, 'dd')}">15</div>
+                </div>
+                <div class="apt-time-details">
+                    <div class="time">
+                        <span class="material-symbols-outlined">schedule</span>
+                        <span th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">10:30 AM</span>
+                    </div>
+                    <div class="year" th:text="${#temporals.format(apt.appointmentDate, 'EEEE, yyyy')}">Thursday, 2026</div>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="apt-details">
+                <div class="apt-service" th:text="${apt.serviceType}">Routine Checkup</div>
+                <div class="apt-dentist">
+                    <span class="material-symbols-outlined">dentistry</span>
+                    <span th:text="'Dr. ' + ${apt.dentist.fullName}">Dr. Smith</span>
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="apt-status">
+                <div class="badge-row">
+                    <span class="badge-label">Status</span>
+                    <span th:class="'status-badge status-' + ${#strings.toLowerCase(apt.status)}" th:text="${apt.status}">SCHEDULED</span>
+                </div>
+                <div class="badge-row">
+                    <span class="badge-label">Payment</span>
+                    <span th:if="${apt.payment != null}" class="status-badge status-payment" th:text="${apt.payment.status}">PENDING</span>
+                    <span th:unless="${apt.payment != null}" class="status-badge status-payment" style="opacity: 0.6;">N/A</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State (Shows when no appointments exist) -->
+        <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
+            <span class="material-symbols-outlined" style="font-size: 64px; color: var(--primary-color); opacity: 0.4; margin-bottom: 24px;">calendar_month</span>
+            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">No Appointments Yet</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 32px; max-width: 400px; margin-inline: auto;">You do not have any upcoming or past dental visits on record. Book your first consultation today.</p>
+            <button class="btn-primary" onclick="openBookingModal()" style="padding: 14px 32px; font-size: 15px;">
+                <span class="material-symbols-outlined">add_circle</span> Book Consultation
+            </button>
+        </div>
+
+    </div>
+</main>
+
+<!-- BOOKING WIZARD MODAL -->
+<div class="modal-overlay" id="bookingModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Book Appointment</h2>
+            <button class="close-btn" onclick="closeBookingModal()"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <!-- STEP 1: Details -->
+        <div id="step1" class="step active">
+            <div class="input-group">
+                <label>Select Dentist</label>
+                <div class="input-wrapper">
+                    <select id="dentistId">
+                        <option value="">-- Choose a Practitioner --</option>
+                        <option th:each="doc : ${dentists}" th:value="${doc.id}" th:text="'Dr. ' + ${doc.fullName} + ' (' + ${doc.specialization} + ')'"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Service Required</label>
+                <div class="input-wrapper">
+                    <input type="text" id="serviceType" placeholder="e.g. Routine Checkup, Toothache, Whitening">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Notes for the Dentist (Optional)</label>
+                <div class="input-wrapper">
+                    <textarea id="patientNotes" rows="3" placeholder="Describe any pain or specific concerns..."></textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
+                <button class="btn-primary" onclick="goToStep2()">Next Step <span class="material-symbols-outlined">arrow_forward</span></button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Custom Calendar -->
+        <div id="step2" class="step">
+            <div class="calendar-header">
+                <div class="static-year">2026</div>
+                <div class="month-toggler">
+                    <button onclick="changeMonth(-1)"><span class="material-symbols-outlined">chevron_left</span></button>
+                    <span id="currentMonthDisplay" style="min-width: 100px; text-align: center;">September</span>
+                    <button onclick="changeMonth(1)"><span class="material-symbols-outlined">chevron_right</span></button>
+                </div>
+            </div>
+
+            <!-- 5-Day Horizontal Slider -->
+            <div class="date-slider" id="dateSlider">
+                <!-- Dates populated by JavaScript -->
+            </div>
+
+            <div class="time-grid" id="timeGrid">
+                <!-- Populated dynamically via fetch. Showing empty state initially. -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px;">
+                    Select a date above to view available time slots.
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+                <button class="btn-outline" onclick="showStep(1)">Back</button>
+                <button class="btn-primary" onclick="goToStep3()">Next Step <span class="material-symbols-outlined">arrow_forward</span></button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Payment Method -->
+        <div id="step3" class="step">
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Please select how you would like to settle the consultation fee.</p>
+
+            <label class="payment-option">
+                <input type="radio" name="payMethod" value="CASH" checked>
+                <span class="material-symbols-outlined payment-icon">payments</span>
+                <div class="payment-text">
+                    <h4>Cash on Visit</h4>
+                    <p>Pay at the reception desk after your appointment.</p>
+                </div>
+            </label>
+
+            <label class="payment-option">
+                <input type="radio" name="payMethod" value="BANK_TRANSFER">
+                <span class="material-symbols-outlined payment-icon">account_balance</span>
+                <div class="payment-text">
+                    <h4>Bank Transfer</h4>
+                    <p>Upload a transfer slip to the billing portal later.</p>
+                </div>
+            </label>
+
+            <label class="payment-option">
+                <input type="radio" name="payMethod" value="ONLINE">
+                <span class="material-symbols-outlined payment-icon">credit_card</span>
+                <div class="payment-text">
+                    <h4>Online Payment (PayHere)</h4>
+                    <p>Securely pay now via credit/debit card.</p>
+                </div>
+            </label>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+                <button class="btn-outline" onclick="showStep(2)">Back</button>
+                <button class="btn-primary" onclick="submitAppointment()" id="confirmBtn">Confirm & Book <span class="material-symbols-outlined">check_circle</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- MODAL CONTROLS ---
+    function openBookingModal() {
+        document.getElementById('bookingModal').classList.add('active');
+        showStep(1);
+        resetWizard();
+    }
+
+    function closeBookingModal() {
+        document.getElementById('bookingModal').classList.remove('active');
+    }
+
+    function resetWizard() {
+        document.getElementById('dentistId').value = "";
+        document.getElementById('serviceType').value = "";
+        document.getElementById('patientNotes').value = "";
+        selectedDate = null;
+        selectedTime = null;
+        document.getElementById('timeGrid').innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px;">Select a date above to view available time slots.</div>`;
+    }
+
+    // --- WIZARD NAVIGATION ---
+    function showStep(num) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + num).classList.add('active');
+
+        const titles = ["1. Appointment Details", "2. Select Date & Time", "3. Payment Method"];
+        document.getElementById('modalTitle').innerText = titles[num - 1];
+    }
+
+    function goToStep2() {
+        if(!document.getElementById('dentistId').value) return alert("Please select a dentist.");
+        if(!document.getElementById('serviceType').value.trim()) return alert("Please enter the service required.");
+
+        showStep(2);
+        renderCalendar();
+    }
+
+    function goToStep3() {
+        if(!selectedDate) return alert("Please select a date from the calendar.");
+        if(!selectedTime) return alert("Please select an available time slot.");
+        showStep(3);
+    }
+
+    // --- CALENDAR LOGIC ---
+    const year = 2026;
+    let currentMonth = 8; // Defaulting to September (0-indexed) based on system context
+    let selectedDate = null;
+    let selectedTime = null;
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    function renderCalendar() {
+        document.getElementById('currentMonthDisplay').innerText = monthNames[currentMonth];
+        const slider = document.getElementById('dateSlider');
+        slider.innerHTML = '';
+
+        const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
+        // Assuming current system date is Sept 15, 2026 for past-date filtering logic
+        const sysDate = new Date(2026, 8, 15);
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateObj = new Date(year, currentMonth, i);
+
+            // Filter past dates strictly based on the 2026 context
+            if(dateObj < sysDate) continue;
+
+            const dateStr = `${year}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+
+            const box = document.createElement('div');
+            box.className = 'date-box';
+            if (selectedDate === dateStr) box.classList.add('selected');
+
+            box.innerHTML = `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">${dayName}</div>
+                             <div style="font-size: 24px; font-weight: 800;">${i}</div>`;
+
+            box.onclick = () => {
+                document.querySelectorAll('.date-box').forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                selectedDate = dateStr;
+                selectedTime = null; // reset time on new date
+                fetchTimeSlots(dateStr);
+            };
+
+            slider.appendChild(box);
+        }
+    }
+
+    function changeMonth(dir) {
+        currentMonth += dir;
+        if (currentMonth < 0) currentMonth = 0;
+        if (currentMonth > 11) currentMonth = 11;
+        renderCalendar();
+    }
+
+    async function fetchTimeSlots(dateStr) {
+        const dentistId = document.getElementById('dentistId').value;
+        const grid = document.getElementById('timeGrid');
+
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 24px;"><span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span></div>';
+
+        try {
+            const response = await fetch(`/api/appointments/available?dentistId=${dentistId}&date=${dateStr}`);
+            const times = await response.json();
+
+            grid.innerHTML = '';
+
+            if(times.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: #dc2626; background: #fee2e2; border-radius: 12px; font-weight: 600;">No available slots on this date.</div>`;
+                return;
+            }
+
+            times.forEach(time => {
+                // Expected format from backend: "08:00:00". Format it to "08:00" for UI.
+                const formattedTime = time.substring(0, 5);
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.innerText = formattedTime;
+
+                slot.onclick = () => {
+                    document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
+                    slot.classList.add('selected');
+                    selectedTime = time; // Use raw time for backend payload
+                };
+                grid.appendChild(slot);
+            });
+        } catch (error) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">Error loading slots. Please try again.</div>`;
+        }
+    }
+
+    // --- SUBMISSION ---
+    async function submitAppointment() {
+        const btn = document.getElementById('confirmBtn');
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
+
+        const payload = {
+            dentistId: document.getElementById('dentistId').value,
+            serviceType: document.getElementById('serviceType').value,
+            patientNotes: document.getElementById('patientNotes').value,
+            appointmentDate: selectedDate,
+            startTime: selectedTime,
+            paymentMethod: document.querySelector('input[name="payMethod"]:checked').value
+        };
+
+        try {
+            const response = await fetch('/api/appointments/book', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.href = "/payment";
+            } else {
+                alert("Failed to book appointment: " + await response.text());
+                btn.disabled = false;
+                btn.innerHTML = 'Confirm & Book <span class="material-symbols-outlined">check_circle</span>';
+            }
+        } catch(error) {
+            alert("Network error occurred.");
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm & Book <span class="material-symbols-outlined">check_circle</span>';
+        }
+    }
+</script>
+
+<style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+
+</body>
+</html>

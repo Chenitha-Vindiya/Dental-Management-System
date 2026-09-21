@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - Manage Admins</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+
+    <style>
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 48px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        .add-btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed);
+        }
+
+        .add-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+        }
+
+        /* Glass Card for Table */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow-ambient);
+            width: 100%;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover; /* Ensures the image stays perfectly inside the circle */
+            flex-shrink: 0;
+        }
+
+        /* Aligns the avatar and name side-by-side */
+        .user-profile-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge.super-admin {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge.system-admin {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.receptionist {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        /* Action Buttons */
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
+        }
+
+        .action-btn.edit {
+            color: var(--primary-color);
+            background: rgba(0, 90, 183, 0.1);
+        }
+
+        .action-btn.edit:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .action-btn.deactivate {
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .action-btn.deactivate:hover {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .action-btn.activate {
+            color: #166534;
+            background: rgba(22, 101, 52, 0.1);
+        }
+
+        .action-btn.activate:hover {
+            background: #166534;
+            color: #fff;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 28, 45, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-ambient);
+            transform: translateY(20px);
+            transition: transform var(--transition-speed);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #dc2626;
+            transform: rotate(90deg);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        /* Apply glass styling to standard inputs and the new addon wrapper */
+        .input-wrapper input, .input-wrapper select, .email-addon-wrapper input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus, .email-addon-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        /* Specific Add-on for Email Domain */
+        .email-addon-wrapper { display: flex; align-items: stretch; }
+        .email-addon-wrapper input { border-radius: 12px 0 0 12px; border-right: none; }
+        .email-addon-wrapper .domain-addon {
+            background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-left: none;
+            border-radius: 0 12px 12px 0; padding: 0 16px; display: flex; align-items: center;
+            color: var(--text-muted); font-weight: 600; font-size: 14px; white-space: nowrap;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all var(--transition-speed);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="header">
+        <div>
+            <h1>Administrator Management</h1>
+            <p style="color: var(--text-muted);">Manage existing system access and roles.</p>
+        </div>
+        <!-- Opens the modal -->
+        <button class="add-btn" onclick="openAddAdminModal()">
+            <span class="material-symbols-outlined">person_add</span> New Admin
+        </button>
+    </div>
+
+    <!-- Full Width Data Table -->
+    <div class="glass-card">
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="admin : ${admins}">
+                    <!-- Profile Picture and Name -->
+                    <td>
+                        <div class="user-profile-cell">
+
+                            <!-- Generates an avatar with initials based on the admin's full name -->
+                            <img th:src="@{https://ui-avatars.com/api/(name=${admin.fullName}, background='random', bold='true')}"
+                                 alt="Profile"
+                                 class="admin-avatar">
+
+                            <span th:text="${admin.fullName}" style="font-weight: 600; color: var(--text-color);">Name</span>
+                        </div>
+                    </td>
+                    <td th:text="${admin.email}">email@admin.com</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${#strings.toLowerCase(#strings.replace(admin.role, '_', '-'))}"
+                              th:text="${#strings.replace(admin.role, '_', ' ')}">ROLE</span>
+                    </td>
+                    <td>
+                        <span th:if="${admin.active}"
+                              style="color: #166534; font-weight: 700; display: flex; align-items: center; gap: 4px; min-width: 110px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active
+                        </span>
+                        <span th:unless="${admin.active}"
+                              style="color: #dc2626; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">cancel</span> Inactive
+                        </span>
+                    </td>
+                    <!-- Action Buttons Column -->
+                    <td>
+                        <!-- Only show buttons if it is NOT the Super Admin (ID 1) AND NOT the currently logged-in user -->
+                        <div class="actions-cell" th:if="${admin.id != 1 and admin.email != currentUserEmail}">
+                            <!-- Edit Button -->
+                            <button class="action-btn edit" title="Edit Admin"
+                                    th:onclick="|openEditModal(${admin.id})|">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+
+                            <!-- Toggle Status Button (Dynamic depending on active status) -->
+                            <button th:if="${admin.active}" class="action-btn deactivate" title="Deactivate Admin"
+                                    th:onclick="|toggleAdminStatus(${admin.id}, false)|">
+                                <span class="material-symbols-outlined">block</span>
+                            </button>
+                            <button th:unless="${admin.active}" class="action-btn activate" title="Activate Admin"
+                                    th:onclick="|toggleAdminStatus(${admin.id}, true)|">
+                                <span class="material-symbols-outlined">settings_backup_restore</span>
+                            </button>
+                        </div>
+
+                        <!-- Show a label instead of buttons for protected rows -->
+                        <span th:if="${admin.id == 1}"
+                              style="font-size: 13px; font-weight: 600; color: var(--text-muted);">System Protected
+                        </span>
+                        <span th:if="${admin.email == currentUserEmail and admin.id != 1}"
+                              style="font-size: 13px; font-weight: 600; color: var(--primary-color);">
+                            Current Session
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- ADD ADMIN MODAL -->
+<div class="modal-overlay" id="addAdminModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">person_add</span> Register Admin</h2>
+            <button class="close-btn" onclick="closeModal('addAdminModal')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="input-group">
+            <label>Full Name</label>
+            <div class="input-wrapper"><input type="text" id="newAdminName" placeholder="e.g. Dr. Sarah Jenkins"></div>
+        </div>
+
+        <!-- SPECIAL DOMAIN INPUT -->
+        <div class="input-group">
+            <label>Work Email</label>
+            <div class="email-addon-wrapper">
+                <input type="text" id="newAdminEmailPrefix" placeholder="sarah.jenkins">
+                <div class="domain-addon">@admin.com</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <div class="input-wrapper"><input type="password" id="newAdminPassword" placeholder="Secure password"></div>
+        </div>
+        <div class="input-group">
+            <label>Assign Role</label>
+            <div class="input-wrapper">
+                <select id="newAdminRole">
+                    <option value="SYSTEM_ADMIN">System Admin</option>
+                    <option value="RECEPTIONIST">Receptionist</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                </select>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="submitNewAdmin()">Create Account</button>
+    </div>
+</div>
+
+<!-- EDIT ADMIN MODAL -->
+<div class="modal-overlay" id="editAdminModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">edit_square</span> Edit Admin</h2>
+            <button class="close-btn" onclick="closeModal('editAdminModal')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Hidden input to store the ID of the admin we are editing -->
+        <input type="hidden" id="editAdminId">
+
+        <div class="input-group">
+            <label>Full Name</label>
+            <div class="input-wrapper"><input type="text" id="editAdminName"></div>
+        </div>
+        <div class="input-group">
+            <label>Work Email</label>
+            <div class="email-addon-wrapper">
+                <input type="text" id="editAdminEmailPrefix">
+                <div class="domain-addon">@admin.com</div>
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Assign Role</label>
+            <div class="input-wrapper">
+                <select id="editAdminRole">
+                    <option value="SYSTEM_ADMIN">System Admin</option>
+                    <option value="RECEPTIONIST">Receptionist</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                </select>
+            </div>
+        </div>
+        <button class="submit-btn" onclick="submitEditAdmin()">Save Changes</button>
+    </div>
+</div>
+
+<script>
+    // Modal controls
+    function openAddAdminModal() {
+        document.getElementById('addAdminModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+
+        // Clear inputs if it's the add modal
+        if (modalId === 'addAdminModal') {
+            document.getElementById('newAdminName').value = '';
+            document.getElementById('newAdminEmailPrefix').value = '';
+            document.getElementById('newAdminPassword').value = '';
+        }
+    }
+
+    // Close on outside click for both modals
+    window.onclick = function (event) {
+        const addModal = document.getElementById('addAdminModal');
+        const editModal = document.getElementById('editAdminModal');
+        if (event.target == addModal) closeModal('addAdminModal');
+        if (event.target == editModal) closeModal('editAdminModal');
+    }
+
+    // --- CREATE ADMIN ---
+    async function submitNewAdmin() {
+        const name = document.getElementById('newAdminName').value.trim();
+        const emailPrefix = document.getElementById('newAdminEmailPrefix').value.trim();
+        const password = document.getElementById('newAdminPassword').value;
+        const role = document.getElementById('newAdminRole').value;
+
+        if (!name || !emailPrefix || !password) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        // Piece together the email prefix and the mandatory domain
+        const fullEmail = emailPrefix + "@admin.com";
+
+        const response = await fetch('/api/admin/create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({fullName: name, email: fullEmail, password: password, role: role})
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const errorText = await response.text();
+            alert("Registration Error: " + errorText);
+        }
+    }
+
+    // --- OPEN EDIT MODAL & FETCH DATA ---
+    async function openEditModal(adminId) {
+        try {
+            const response = await fetch(`/api/admin/${adminId}`);
+            if (response.ok) {
+                const admin = await response.json();
+
+                // Populate the form fields
+                document.getElementById('editAdminId').value = admin.id;
+                document.getElementById('editAdminName').value = admin.fullName;
+                document.getElementById('editAdminRole').value = admin.role;
+
+                // Extract just the prefix before the @ sign for the custom input
+                const emailPrefix = admin.email.split('@')[0];
+                document.getElementById('editAdminEmailPrefix').value = emailPrefix;
+
+                // Open the modal
+                document.getElementById('editAdminModal').classList.add('active');
+            } else {
+                alert("Failed to load administrator data.");
+            }
+        } catch (error) {
+            console.error("Error fetching admin data:", error);
+        }
+    }
+
+    // --- SUBMIT EDIT CHANGES ---
+    async function submitEditAdmin() {
+        const id = document.getElementById('editAdminId').value;
+        const name = document.getElementById('editAdminName').value.trim();
+        const emailPrefix = document.getElementById('editAdminEmailPrefix').value.trim();
+        const role = document.getElementById('editAdminRole').value;
+
+        if (!name || !emailPrefix) {
+            alert("Name and Email are required.");
+            return;
+        }
+
+        // Piece together the email prefix and the mandatory domain
+        const fullEmail = emailPrefix + "@admin.com";
+
+        const response = await fetch(`/api/admin/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                fullName: name,
+                email: fullEmail,
+                role: role
+            })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const errorText = await response.text();
+            alert("Update Error: " + errorText);
+        }
+    }
+
+    // --- TOGGLE ACTIVE STATUS (BLOCK/RESTORE) ---
+    async function toggleAdminStatus(adminId, newStatus) {
+        const actionText = newStatus ? "activate" : "deactivate";
+        const confirmed = confirm(`Are you sure you want to ${actionText} this administrator?`);
+
+        if (!confirmed) return;
+
+        const response = await fetch(`/api/admin/${adminId}/status`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: newStatus})
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            // This will now perfectly display our backend security rules!
+            const errorText = await response.text();
+            alert(errorText);
+        }
+    }
+
+</script>
+</body>
+</html>

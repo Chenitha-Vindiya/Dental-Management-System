@@ -37,5 +37,5 @@ public class Admin {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private Boolean active = true;
 }

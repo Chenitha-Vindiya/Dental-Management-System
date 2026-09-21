@@ -22,6 +22,9 @@ public class Patient {
     private String password;
 
     @Column(nullable = false)
+    private boolean isVerified = false;
+
+    @Column(nullable = false)
     private String fullName;
 
     private String phoneNumber;
@@ -34,4 +37,6 @@ public class Patient {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    private String profilePicture;
 }

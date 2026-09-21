@@ -16,7 +16,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        // Publicly accessible paths
                         .requestMatchers("/", "/auth", "/api/auth/**", "/css/**", "/js/**").permitAll()
+
+                        // SECURE ALL ADMIN PAGES AND APIS
+                        .requestMatchers("/admin/**", "/api/admin/**").authenticated()
+
+                        // Any other request must also be authenticated
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

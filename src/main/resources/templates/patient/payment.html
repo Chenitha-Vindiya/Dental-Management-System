@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - Billing & Payments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Global Patient Sidebar CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <!-- PayHere Sandbox SDK -->
+    <script type="text/javascript" src="https://www.payhere.lk/lib/payhere.js"></script>
+
+    <style>
+        .main-content { flex: 1; padding: 48px; max-width: 1200px; width: 100%; }
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .header p { color: var(--text-muted); font-size: 15px; }
+
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; box-shadow: var(--shadow-ambient); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 16px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        td { padding: 20px 16px; font-size: 14px; font-weight: 600; color: var(--text-color); border-bottom: 1px solid rgba(0, 0, 0, 0.05); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; }
+        .status-pending { background: #fef08a; color: #854d0e; }
+        .status-processing { background: #e0f2fe; color: #0369a1; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #b91c1c; }
+
+        .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; border: none; text-decoration: none; }
+        .btn-pay { background: var(--primary-color); color: white; }
+        .btn-pay:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-upload { background: #f3f4f6; color: var(--text-color); border: 1px solid rgba(0,0,0,0.1); }
+        .btn-upload:hover { background: #e5e7eb; }
+        .btn-receipt { background: #dcfce7; color: #166534; }
+        .btn-receipt:hover { background: #bbf7d0; }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: var(--shadow-ambient); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; }
+
+        .bank-details { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; }
+        .bank-details strong { display: block; margin-bottom: 4px; color: var(--primary-color); }
+
+        .file-upload-wrapper { margin-top: 24px; }
+        .file-upload-wrapper input[type="file"] { width: 100%; padding: 12px; border: 1px dashed var(--primary-color); border-radius: 12px; background: rgba(255,255,255,0.5); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
+
+<main class="main-content">
+    <div class="header">
+        <h1>Billing & Payments</h1>
+        <p>Manage your consultation fees and view payment history.</p>
+    </div>
+
+    <div class="glass-card">
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="payment : ${payments}">
+                <td th:text="${#temporals.format(payment.createdAt, 'MMM dd, yyyy')}">Oct 15, 2026</td>
+                <td>
+                    <div style="font-weight: 700;" th:text="${payment.appointment.serviceType}">Checkup</div>
+                    <div style="font-size: 12px; color: var(--text-muted);" th:text="'Dr. ' + ${payment.appointment.dentist.fullName}">Dr. Smith</div>
+                </td>
+                <td>
+                    <span th:if="${payment.method == 'CASH'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">payments</span> Cash</span>
+                    <span th:if="${payment.method == 'ONLINE'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">credit_card</span> PayHere</span>
+                    <span th:if="${payment.method == 'BANK_TRANSFER'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">account_balance</span> Bank</span>
+                </td>
+                <td th:text="'Rs. ' + ${#numbers.formatDecimal(payment.amount, 1, 2)}">Rs. 1500.00</td>
+                <td>
+                    <span th:if="${payment.status == 'PENDING_VISIT' || payment.status == 'PENDING_ONLINE' || payment.status == 'PENDING_TRANSFER'}" class="status-badge status-pending">Pending</span>
+                    <span th:if="${payment.status == 'PENDING_TRANSFER_VERIFICATION'}" class="status-badge status-processing">Verifying</span>
+                    <span th:if="${payment.status == 'COMPLETED'}" class="status-badge status-completed">Completed</span>
+                    <span th:if="${payment.status == 'REJECTED'}" class="status-badge status-rejected">Rejected</span>
+                </td>
+                <td style="text-align: right;">
+
+                    <!-- Actions based on status and method -->
+
+                    <!-- Online Pending -->
+                    <button th:if="${payment.status == 'PENDING_ONLINE'}" class="btn-action btn-pay" th:onclick="'startOnlinePayment(' + ${payment.id} + ')'">
+                        <span class="material-symbols-outlined">security</span> Pay Now
+                    </button>
+
+                    <!-- Bank Transfer Pending or Rejected -->
+                    <button th:if="${(payment.method == 'BANK_TRANSFER') and (payment.status == 'PENDING_TRANSFER' or payment.status == 'REJECTED')}" class="btn-action btn-upload" th:onclick="'openBankModal(' + ${payment.id} + ')'">
+                        <span class="material-symbols-outlined">upload_file</span> Upload Slip
+                    </button>
+
+                    <!-- Cash Pending -->
+                    <span th:if="${payment.status == 'PENDING_VISIT'}" style="font-size: 13px; color: var(--text-muted);">Pay at Clinic</span>
+
+                    <!-- Completed (All Methods) -->
+                    <button th:if="${payment.status == 'COMPLETED'}" class="btn-action btn-receipt" th:onclick="'generateReceipt(' + ${payment.id} + ')'">
+                        <span class="material-symbols-outlined">receipt</span> Receipt
+                    </button>
+
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(payments)}">
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No payment records found.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- BANK TRANSFER UPLOAD MODAL -->
+<div class="modal-overlay" id="bankModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">account_balance</span> Bank Transfer</h2>
+            <button class="close-btn" onclick="closeBankModal()"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Please transfer the exact amount to one of the following accounts and upload your PDF or image receipt.</p>
+
+        <!-- These will eventually be fetched from the database (Admin managed) -->
+        <div class="bank-details">
+            <strong>Commercial Bank</strong>
+            Account Name: AuraDent Clinic<br>
+            Account No: 1234567890<br>
+            Branch: Colombo 03
+        </div>
+        <div class="bank-details">
+            <strong>Bank of Ceylon</strong>
+            Account Name: AuraDent Clinic<br>
+            Account No: 0987654321<br>
+            Branch: Kollupitiya
+        </div>
+
+        <div class="file-upload-wrapper">
+            <input type="hidden" id="uploadPaymentId">
+            <label style="font-size: 13px; font-weight: 700; margin-bottom: 8px; display: block;">Upload Receipt Slip (PDF/JPG/PNG)</label>
+            <input type="file" id="receiptFile" accept=".pdf, image/png, image/jpeg" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 24px; gap: 12px;">
+            <button class="btn-action btn-upload" onclick="closeBankModal()">Cancel</button>
+            <button class="btn-action btn-pay" onclick="submitBankReceipt()" id="uploadBtn">Submit Slip</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- PAYHERE ONLINE PAYMENT LOGIC ---
+    async function startOnlinePayment(paymentId) {
+        try {
+            // 1. Fetch the hash and Order ID from your backend
+            const response = await fetch(`/api/payments/${paymentId}/generate-hash`);
+            if (!response.ok) throw new Error("Failed to initialize payment");
+
+            const data = await response.json();
+
+            // 2. Configure PayHere payload
+            const paymentObj = {
+                "sandbox": true,
+                "merchant_id": "1234567",    // Replace with your actual Sandbox Merchant ID
+                "return_url": window.location.origin + "/billing",
+                "cancel_url": window.location.origin + "/billing",
+                "notify_url": "YOUR_NGROK_URL/api/payments/payhere-notify", // Webhook URL (requires ngrok for local testing)
+                "order_id": data.orderId,
+                "items": "Dental Consultation",
+                "amount": data.amount,
+                "currency": "LKR",
+                "hash": data.hash,
+                "first_name": "[[${patient.fullName}]]",
+                "last_name": "",
+                "email": "[[${patient.email}]]",
+                "phone": "[[${patient.phoneNumber}]]",
+                "address": "Colombo",
+                "city": "Colombo",
+                "country": "Sri Lanka"
+            };
+
+            // 3. Define Callbacks
+            payhere.onCompleted = function onCompleted(orderId) {
+                alert("Payment Completed! Refreshing...");
+                window.location.reload();
+                // Note: The backend webhook actually verifies and updates the DB status
+            };
+            payhere.onDismissed = function onDismissed() {
+                console.log("Payment dismissed by user");
+            };
+            payhere.onError = function onError(error) {
+                alert("Payment Error: " + error);
+            };
+
+            // 4. Trigger the PayHere Overlay
+            payhere.startCheckout(paymentObj);
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    // --- BANK TRANSFER UPLOAD LOGIC ---
+    function openBankModal(paymentId) {
+        document.getElementById('uploadPaymentId').value = paymentId;
+        document.getElementById('receiptFile').value = '';
+        document.getElementById('bankModal').classList.add('active');
+    }
+
+    function closeBankModal() {
+        document.getElementById('bankModal').classList.remove('active');
+    }
+
+    async function submitBankReceipt() {
+        const paymentId = document.getElementById('uploadPaymentId').value;
+        const fileInput = document.getElementById('receiptFile');
+        const btn = document.getElementById('uploadBtn');
+
+        if (fileInput.files.length === 0) {
+            return alert("Please select a file to upload.");
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Uploading...";
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+            const response = await fetch(`/api/payments/${paymentId}/upload-receipt`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Receipt uploaded successfully. Waiting for admin verification.");
+                window.location.reload();
+            } else {
+                alert("Upload failed: " + await response.text());
+                btn.disabled = false;
+                btn.innerText = "Submit Slip";
+            }
+        } catch (error) {
+            alert("Network error occurred.");
+            btn.disabled = false;
+            btn.innerText = "Submit Slip";
+        }
+    }
+
+    // --- RECEIPT GENERATION ---
+    function generateReceipt(paymentId) {
+        // This can redirect to a PDF generation endpoint or open a print-friendly window
+        window.open(`/api/payments/${paymentId}/receipt`, '_blank');
+    }
+</script>
+
+</body>
+</html>

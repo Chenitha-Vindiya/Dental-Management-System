@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - Dentist Profile</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Global Sidebar CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .header p { color: var(--text-muted); font-size: 15px; }
+
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .profile-layout { grid-template-columns: 1fr; }
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--shadow-ambient);
+        }
+
+        .profile-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-avatar-large {
+            width: 96px;
+            height: 96px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 12px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .profile-meta-list {
+            width: 100%;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .meta-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0, 90, 183, 0.05);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meta-text { display: flex; flex-direction: column; }
+        .meta-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+        .meta-value { font-size: 14px; color: var(--text-color); font-weight: 700; }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 16px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
+        }
+
+        .btn-row { display: flex; justify-content: flex-end; margin-top: 24px; gap: 12px; }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-outline:hover { background: rgba(0, 0, 0, 0.05); }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        .action-row .action-info h4 { font-size: 15px; margin-bottom: 4px; }
+        .action-row .action-info p { font-size: 13px; color: var(--text-muted); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(17, 28, 45, 0.4); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 32px; width: 100%; max-width: 440px; box-shadow: var(--shadow-ambient);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .close-btn:hover { color: #dc2626; transform: rotate(90deg); }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{dentist/fragments/sidebar :: dentist-sidebar}"></div>
+
+<main class="main-content">
+    <div class="header">
+        <h1>Clinical Profile</h1>
+        <p>Manage your professional details, contact information, and security settings.</p>
+    </div>
+
+    <div class="profile-layout">
+        <!-- LEFT COLUMN: Overview -->
+        <div class="glass-card profile-overview">
+            <div class="profile-avatar-large" th:text="${#strings.substring(dentist.fullName, 0, 1)}">D</div>
+            <h2 th:text="'Dr. ' + ${dentist.fullName}" style="font-size: 20px; margin-bottom: 4px;">Dr. Smith</h2>
+            <p th:text="${dentist.email}" style="font-size: 14px; color: var(--text-muted);">smith@dentist.com</p>
+            <span class="badge-status">Active Dentist</span>
+
+            <div class="profile-meta-list">
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">medical_services</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Specialization</span>
+                        <span class="meta-value" th:text="${dentist.specialization}">General Dentistry</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon"><span class="material-symbols-outlined">call</span></div>
+                    <div class="meta-text">
+                        <span class="meta-label">Contact Number</span>
+                        <span class="meta-value" th:text="${dentist.phoneNumber != null ? dentist.phoneNumber : 'Not provided'}">+94 77 000 0000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Forms -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- Professional Info Section -->
+            <div class="glass-card">
+                <h3 class="section-title"><span class="material-symbols-outlined">person</span> Professional Information</h3>
+
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper"><input type="text" id="profileName" th:value="${dentist.fullName}"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>Contact Number</label>
+                    <div class="input-wrapper"><input type="tel" id="profilePhone" th:value="${dentist.phoneNumber}"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>Specialization (Managed by Admin)</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:value="${dentist.specialization}" readonly style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;">
+                    </div>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Standard Consultation Fee (Managed by Admin)</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:value="'Rs. ' + ${#numbers.formatDecimal(dentist.consultationFee, 1, 2)}" readonly
+                               style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Work Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" th:value="${dentist.email}" readonly style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="promptSaveProfile()">
+                        <span class="material-symbols-outlined">save</span> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="glass-card">
+                <h3 class="section-title"><span class="material-symbols-outlined">security</span> Account & Security</h3>
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4>Account Password</h4>
+                        <p>Update your password to keep your clinical account secure.</p>
+                    </div>
+                    <button class="btn-outline" onclick="openModal('passwordModal')">Change Password</button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0;">
+
+                <div class="action-row">
+                    <div class="action-info">
+                        <h4 style="color: #dc2626;">Deactivate Account</h4>
+                        <p>Suspend your clinical account and remove dashboard access. An admin will be required to restore access.</p>
+                    </div>
+                    <button class="btn-danger" onclick="promptDeactivate()">Deactivate</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">lock_reset</span> Change Password</h2>
+            <button class="close-btn" onclick="closeModal('passwordModal')"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <div id="passwordErrorBanner" style="display: none; align-items: center; gap: 8px; background-color: #fff3f3; border: 1px solid #ffcdd2; color: #d32f2f; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">error</span>
+            <span id="passwordErrorMessage">Error message goes here.</span>
+        </div>
+
+        <div class="input-group">
+            <label>New Password</label>
+            <div class="input-wrapper"><input type="password" id="newPassword" placeholder="Enter new password"></div>
+        </div>
+        <div class="input-group">
+            <label>Confirm New Password</label>
+            <div class="input-wrapper"><input type="password" id="confirmPassword" placeholder="Confirm new password"></div>
+        </div>
+        <div class="btn-row" style="margin-top: 32px;">
+            <button class="btn-outline" onclick="closeModal('passwordModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitPasswordChange()">Update Password</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    async function promptSaveProfile() {
+        const name = document.getElementById('profileName').value;
+        const phone = document.getElementById('profilePhone').value;
+
+        if (!name) return alert("Full Name is required.");
+
+        if(confirm("Are you sure you want to update your profile information?")) {
+            // Note: You will need to create this PUT endpoint in a DentistRestController
+            const response = await fetch('/api/dentist/profile/info', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({fullName: name, phoneNumber: phone})
+            });
+
+            if (response.ok) {
+                alert("Profile updated successfully!");
+                window.location.reload();
+            } else {
+                alert("Update Error: " + await response.text());
+            }
+        }
+    }
+
+    async function submitPasswordChange() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorBanner = document.getElementById('passwordErrorBanner');
+        const errorMessage = document.getElementById('passwordErrorMessage');
+
+        const showError = (msg) => {
+            errorMessage.innerText = msg;
+            errorBanner.style.display = 'flex';
+        };
+
+        errorBanner.style.display = 'none';
+
+        if (!newPassword || !confirmPassword) return showError("Please fill in both fields.");
+        if (newPassword !== confirmPassword) return showError("Passwords do not match.");
+
+        try {
+            // Note: You will need to create this PUT endpoint in a DentistRestController
+            const response = await fetch('/api/dentist/profile/password', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: newPassword})
+            });
+
+            if (response.ok) {
+                closeModal('passwordModal');
+                alert("Password updated successfully! Please log in again.");
+                window.location.href = "/logout";
+            } else {
+                showError("Error: " + await response.text());
+            }
+        } catch (error) {
+            showError("A network error occurred.");
+        }
+    }
+
+    async function promptDeactivate() {
+        if(confirm("Are you absolutely sure you want to deactivate your account? You will be logged out immediately and will need an administrator to restore access.")) {
+            try {
+                const response = await fetch('/api/dentist/profile/deactivate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                if (response.ok) {
+                    alert("Your account has been successfully deactivated.");
+                    window.location.href = "/auth";
+                } else {
+                    alert("Action failed: " + await response.text());
+                }
+            } catch (error) {
+                alert("A network error occurred.");
+            }
+        }
+    }
+</script>
+</body>
+</html>

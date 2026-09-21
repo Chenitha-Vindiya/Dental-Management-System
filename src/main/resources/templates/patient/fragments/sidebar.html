@@ -1,0 +1,80 @@
+<!-- Sidebar -->
+<aside class="sidebar" id="patientSidebar" th:fragment="patient-sidebar">
+    <div class="brand">
+        <!-- Interactive icon wrapper that swaps to 'menu' on hover[cite: 2] -->
+        <div class="brand-icon-wrapper" onclick="togglePatientSidebar()" title="Expand/Collapse Menu">
+            <span class="material-symbols-outlined default-icon">qr_code_2</span>
+            <span class="material-symbols-outlined hover-icon">menu</span>
+        </div>
+        <a th:href="@{/dashboard}" class="brand-text" style="text-decoration: none">AuraDent</a>
+    </div>
+
+    <!-- Grouped in nav-links just like the admin side[cite: 2] -->
+    <nav class="nav-links">
+        <a th:href="@{/dashboard}" class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+        <a th:href="@{/appointments}" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+            <span class="material-symbols-outlined">event</span>
+            <span class="nav-text">Appointments</span>
+        </a>
+        <a th:href="@{/records}" class="nav-item" th:classappend="${activePage == 'records'} ? 'active' : ''">
+            <span class="material-symbols-outlined">description</span>
+            <span class="nav-text">Dental Records</span>
+        </a>
+        <a th:href="@{/payment}" class="nav-item" th:classappend="${activePage == 'payment'} ? 'active' : ''">
+            <span class="material-symbols-outlined">payments</span>
+            <span class="nav-text">Payments</span>
+        </a>
+    </nav>
+
+    <!-- Bottom Actions Wrapper (Profile + Logout) -->
+    <div class="sidebar-bottom-actions">
+
+        <!-- Profile Button -->
+        <a th:href="@{/profile}" class="profile-btn">
+
+            <!-- Render image if Google Picture exists -->
+            <img th:if="${patient != null and patient.profilePicture != null}"
+                 th:src="${patient.profilePicture}"
+                 alt="Avatar"
+                 class="avatar"
+                 style="object-fit: cover;">
+
+            <!-- Render initial if no picture exists -->
+            <div th:unless="${patient != null and patient.profilePicture != null}"
+                 class="avatar"
+                 th:text="${patient != null ? #strings.substring(patient.fullName, 0, 1) : 'S'}">S</div>
+
+            <div class="profile-info nav-text">
+                <span class="profile-name" th:text="${patient != null ? patient.fullName : 'Sarah Jenkins'}">Sarah Jenkins</span>
+                <span class="profile-role">Patient Profile</span>
+            </div>
+        </a>
+
+        <!-- Logout Button (Styled to match admin logout)[cite: 2, 3] -->
+        <a th:href="@{/logout}" class="nav-item logout">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="nav-text">Sign Out</span>
+        </a>
+    </div>
+
+    <!-- INLINE SCRIPT: Runs instantly to prevent flickering[cite: 2] -->
+    <script>
+        if (localStorage.getItem("patient-sidebar-collapsed") === "true") {
+            document.getElementById('patientSidebar').classList.add('collapsed');
+        }
+
+        window.togglePatientSidebar = function() {
+            const sidebar = document.getElementById('patientSidebar');
+            sidebar.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                localStorage.setItem("patient-sidebar-collapsed", "true");
+            } else {
+                localStorage.setItem("patient-sidebar-collapsed", "false");
+            }
+        };
+    </script>
+</aside>

@@ -9,122 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet">
 
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+
+
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #f9f9ff 0%, #e7eeff 50%, #d8e3fb 100%);
-            --primary-color: #005ab7;
-            --primary-hover: #0072e5;
-            --text-color: #111c2d;
-            --text-muted: #414754;
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --shadow-ambient: 0 20px 50px -10px rgba(0, 90, 183, 0.15);
-            --transition-speed: 0.3s;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Manrope', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            background: var(--bg-gradient);
-            color: var(--text-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Background Orbs */
-        .ambient-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
-        }
-
-        .orb-1 {
-            width: 500px;
-            height: 500px;
-            background: rgba(0, 90, 183, 0.15);
-            top: -100px;
-            left: 200px;
-        }
-
-        .orb-2 {
-            width: 600px;
-            height: 600px;
-            background: rgba(109, 144, 255, 0.15);
-            bottom: -150px;
-            right: -50px;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            height: 100vh;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            border-right: 1px solid var(--glass-border);
-            padding: 32px 24px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary-color);
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 48px;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-grow: 1;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 12px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all var(--transition-speed);
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--primary-color);
-        }
-
-        .nav-item.active {
-            background: var(--primary-color);
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
-        }
-
-        .nav-item.logout {
-            margin-top: auto;
-            color: #dc2626;
-        }
-
-        .nav-item.logout:hover {
-            background: #fff3f3;
-            color: #dc2626;
-        }
-
         /* Main Content */
         .main-content {
             flex-grow: 1;
@@ -142,27 +30,6 @@
 
         .header h1 {
             font-size: 28px;
-        }
-
-        .add-btn {
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all var(--transition-speed);
-        }
-
-        .add-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 90, 183, 0.2);
         }
 
         /* Stat Cards */
@@ -260,7 +127,7 @@
             color: #3730a3;
         }
 
-        .badge.admin {
+        .badge.system-admin {
             background: #dcfce7;
             color: #166534;
         }
@@ -276,23 +143,7 @@
 <div class="ambient-orb orb-1"></div>
 <div class="ambient-orb orb-2"></div>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-    <div class="brand">
-        <span class="material-symbols-outlined">qr_code_2</span>
-        <span>AuraDent</span>
-    </div>
-
-    <nav class="nav-links">
-        <a href="#" class="nav-item active"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
-        <a href="#" class="nav-item"><span class="material-symbols-outlined">group</span> Patients</a>
-        <a href="#" class="nav-item"><span class="material-symbols-outlined">calendar_month</span> Appointments</a>
-        <a href="#" class="nav-item"><span class="material-symbols-outlined">admin_panel_settings</span> Admins</a>
-        <a href="#" class="nav-item"><span class="material-symbols-outlined">settings</span> Settings</a>
-
-        <a href="/logout" class="nav-item logout"><span class="material-symbols-outlined">logout</span> Log Out</a>
-    </nav>
-</aside>
+<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -301,10 +152,6 @@
             <h1>System Overview</h1>
             <p style="color: var(--text-muted); margin-top: 4px;">Welcome back to the AuraDent admin portal.</p>
         </div>
-
-        <button class="add-btn" onclick="openAddAdminModal()">
-            <span class="material-symbols-outlined">person_add</span> New Admin
-        </button>
     </div>
 
     <!-- Stats Grid -->
@@ -312,7 +159,7 @@
         <div class="stat-card">
             <div class="stat-icon"><span class="material-symbols-outlined">group</span></div>
             <div class="stat-info">
-                <h3>1,248</h3>
+                <h3 th:text="${totalPatients}">0</h3>
                 <p>Total Patients</p>
             </div>
         </div>
@@ -355,8 +202,7 @@
                 <td>
                             <span class="badge"
                                   th:classappend="${#strings.toLowerCase(#strings.replace(admin.role, '_', '-'))}"
-                                  th:text="${admin.role}">
-                                ROLE
+                                  th:text="${#strings.replace(admin.role, '_', ' ')}">ROLE
                             </span>
                 </td>
 
@@ -370,12 +216,5 @@
         </table>
     </div>
 </main>
-
-<script>
-    function openAddAdminModal() {
-        // We will build the modal logic here next!
-        alert("Opening Add Admin Modal...");
-    }
-</script>
 </body>
 </html>
