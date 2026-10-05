@@ -15,11 +15,27 @@
     <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
 
     <style>
+        /* --- Base Layout --- */
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
         .main-content {
             flex: 1;
             padding: 48px;
-            max-width: 1200px;
             width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 1200px;
         }
 
         .header {
@@ -335,112 +351,115 @@
 <div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
 
 <main class="main-content">
-    <div class="header">
-        <h1>My Profile</h1>
-        <p>Manage your personal information, contact details, and account security.</p>
-    </div>
+    <div class="content-container">
 
-    <div class="profile-layout">
-
-        <!-- LEFT COLUMN: Overview -->
-        <div class="glass-card profile-overview">
-
-            <!-- Render image if Google Picture exists -->
-            <img th:if="${patient.profilePicture != null}"
-                 th:src="${patient.profilePicture}"
-                 alt="Profile Picture"
-                 class="profile-avatar-large"
-                 style="object-fit: cover; border: none;">
-
-            <!-- Render initial if no picture exists -->
-            <div th:unless="${patient.profilePicture != null}"
-                 class="profile-avatar-large"
-                 th:text="${#strings.substring(patient.fullName, 0, 1)}">S</div>
-
-            <h2 th:text="${patient.fullName}" style="font-size: 20px; margin-bottom: 4px;">Sarah Jenkins</h2>
-            <p th:text="${patient.email}" style="font-size: 14px; color: var(--text-muted);">sarah@email.com</p>
-            <span class="badge-status">Active Patient</span>
-
-            <div class="profile-meta-list">
-                <div class="meta-item">
-                    <div class="meta-icon"><span class="material-symbols-outlined">call</span></div>
-                    <div class="meta-text">
-                        <span class="meta-label">Phone Number</span>
-                        <span class="meta-value"
-                              th:text="${patient.phoneNumber != null ? patient.phoneNumber : 'Not provided'}">+94 77 000 0000</span>
-                    </div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-icon"><span class="material-symbols-outlined">verified_user</span></div>
-                    <div class="meta-text">
-                        <span class="meta-label">Account Verification</span>
-                        <span class="meta-value"
-                              th:text="${patient.verified ? 'Verified Account' : 'Pending Verification'}"
-                              th:style="${patient.verified ? 'color: #166534;' : 'color: #ca8a04;'}">Verified</span>
-                    </div>
-                </div>
-            </div>
+        <div class="header">
+            <h1>My Profile</h1>
+            <p>Manage your personal information, contact details, and account security.</p>
         </div>
 
-        <!-- RIGHT COLUMN: Forms -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="profile-layout">
 
-            <!-- Personal Info Section -->
-            <div class="glass-card">
-                <h3 class="section-title"><span class="material-symbols-outlined">person</span> Personal Information
-                </h3>
+            <!-- LEFT COLUMN: Overview -->
+            <div class="glass-card profile-overview">
 
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <div class="input-wrapper"><input type="text" id="profileName" th:value="${patient.fullName}"></div>
-                </div>
+                <!-- Render image if Google Picture exists -->
+                <img th:if="${patient.profilePicture != null}"
+                     th:src="${patient.profilePicture}"
+                     alt="Profile Picture"
+                     class="profile-avatar-large"
+                     style="object-fit: cover; border: none;">
 
-                <div class="input-group">
-                    <label>Phone Number</label>
-                    <div class="input-wrapper"><input type="tel" id="profilePhone" th:value="${patient.phoneNumber}">
+                <!-- Render initial if no picture exists -->
+                <div th:unless="${patient.profilePicture != null}"
+                     class="profile-avatar-large"
+                     th:text="${#strings.substring(patient.fullName, 0, 1)}">S</div>
+
+                <h2 th:text="${patient.fullName}" style="font-size: 20px; margin-bottom: 4px;">Sarah Jenkins</h2>
+                <p th:text="${patient.email}" style="font-size: 14px; color: var(--text-muted);">sarah@email.com</p>
+                <span class="badge-status">Active Patient</span>
+
+                <div class="profile-meta-list">
+                    <div class="meta-item">
+                        <div class="meta-icon"><span class="material-symbols-outlined">call</span></div>
+                        <div class="meta-text">
+                            <span class="meta-label">Phone Number</span>
+                            <span class="meta-value"
+                                  th:text="${patient.phoneNumber != null ? patient.phoneNumber : 'Not provided'}">+94 77 000 0000</span>
+                        </div>
                     </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Email Address</label>
-                    <div class="input-wrapper">
-                        <input type="email" th:value="${patient.email}" readonly
-                               style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;"
-                               title="Email cannot be changed directly">
+                    <div class="meta-item">
+                        <div class="meta-icon"><span class="material-symbols-outlined">verified_user</span></div>
+                        <div class="meta-text">
+                            <span class="meta-label">Account Verification</span>
+                            <span class="meta-value"
+                                  th:text="${patient.verified ? 'Verified Account' : 'Pending Verification'}"
+                                  th:style="${patient.verified ? 'color: #166534;' : 'color: #ca8a04;'}">Verified</span>
+                        </div>
                     </div>
-                </div>
-
-                <div class="btn-row">
-                    <button class="btn-primary" onclick="promptSaveProfile()">
-                        <span class="material-symbols-outlined">save</span> Save Changes
-                    </button>
                 </div>
             </div>
 
-            <!-- Security Section -->
-            <div class="glass-card">
-                <h3 class="section-title"><span class="material-symbols-outlined">security</span> Account & Security
-                </h3>
+            <!-- RIGHT COLUMN: Forms -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
 
-                <div class="action-row">
-                    <div class="action-info">
-                        <h4>Account Password</h4>
-                        <p>Update your password to keep your account secure.</p>
+                <!-- Personal Info Section -->
+                <div class="glass-card">
+                    <h3 class="section-title"><span class="material-symbols-outlined">person</span> Personal Information
+                    </h3>
+
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <div class="input-wrapper"><input type="text" id="profileName" th:value="${patient.fullName}"></div>
                     </div>
-                    <button class="btn-outline" onclick="openModal('passwordModal')">Change Password</button>
+
+                    <div class="input-group">
+                        <label>Phone Number</label>
+                        <div class="input-wrapper"><input type="tel" id="profilePhone" th:value="${patient.phoneNumber}">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" th:value="${patient.email}" readonly
+                                   style="background: rgba(0,0,0,0.03); color: var(--text-muted); cursor: not-allowed;"
+                                   title="Email cannot be changed directly">
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn-primary" onclick="promptSaveProfile()">
+                            <span class="material-symbols-outlined">save</span> Save Changes
+                        </button>
+                    </div>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0;">
+                <!-- Security Section -->
+                <div class="glass-card">
+                    <h3 class="section-title"><span class="material-symbols-outlined">security</span> Account & Security
+                    </h3>
 
-                <div class="action-row">
-                    <div class="action-info">
-                        <h4 style="color: #dc2626;">Deactivate Account</h4>
-                        <p>Suspend your account and remove dashboard access.</p>
+                    <div class="action-row">
+                        <div class="action-info">
+                            <h4>Account Password</h4>
+                            <p>Update your password to keep your account secure.</p>
+                        </div>
+                        <button class="btn-outline" onclick="openModal('passwordModal')">Change Password</button>
                     </div>
-                    <button class="btn-danger" onclick="promptDeactivate()">Deactivate</button>
+
+                    <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0;">
+
+                    <div class="action-row">
+                        <div class="action-info">
+                            <h4 style="color: #dc2626;">Deactivate Account</h4>
+                            <p>Suspend your account and remove dashboard access.</p>
+                        </div>
+                        <button class="btn-danger" onclick="promptDeactivate()">Deactivate</button>
+                    </div>
                 </div>
+
             </div>
-
         </div>
     </div>
 </main>

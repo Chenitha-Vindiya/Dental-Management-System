@@ -12,4 +12,5 @@ import java.util.List;
 public interface DentistScheduleRepository extends JpaRepository<DentistSchedule, Long> {
     List<DentistSchedule> findByDentist(Dentist dentist);
     DentistSchedule findByDentistAndDayOfWeek(Dentist dentist, DayOfWeek dayOfWeek);
+    List<DentistSchedule> findByDentistId(Long dentistId);
 }

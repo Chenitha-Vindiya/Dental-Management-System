@@ -14,13 +14,13 @@
             <span class="material-symbols-outlined">dashboard</span>
             <span class="nav-text">Dashboard</span>
         </a>
-        <a th:href="@{/dentist/appointments}" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+        <a th:href="@{/dentist/dentist-schedule}" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
             <span class="material-symbols-outlined">event</span>
             <span class="nav-text">My Schedule</span>
         </a>
-        <a th:href="@{/dentist/patients}" class="nav-item" th:classappend="${activePage == 'patients'} ? 'active' : ''">
-            <span class="material-symbols-outlined">group</span>
-            <span class="nav-text">Patient Records</span>
+        <a th:href="@{/dentist/records}" class="nav-item" th:classappend="${activePage == 'records'} ? 'active' : ''">
+            <span class="material-symbols-outlined">description</span>
+            <span class="nav-text">Medical Records</span>
         </a>
     </nav>
 

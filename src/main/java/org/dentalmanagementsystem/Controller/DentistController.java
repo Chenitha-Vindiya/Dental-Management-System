@@ -2,8 +2,6 @@ package org.dentalmanagementsystem.Controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.dentalmanagementsystem.Entity.Dentist;
-import org.dentalmanagementsystem.Repository.DentistRepository;
 import org.dentalmanagementsystem.Service.DentistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/api/dentist")
 @RequiredArgsConstructor
 public class DentistController {

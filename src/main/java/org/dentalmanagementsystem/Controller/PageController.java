@@ -5,9 +5,11 @@ import org.dentalmanagementsystem.Entity.*;
 import org.dentalmanagementsystem.Repository.*;
 import org.dentalmanagementsystem.Service.DentistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -33,6 +35,12 @@ public class PageController {
 
     @Autowired
     private PaymentRecordRepository paymentRecordRepository;
+
+    @Autowired
+    private DentistScheduleRepository dentistScheduleRepository;
+
+    @Autowired
+    private ScheduleChangeRequestRepository scheduleChangeRequestRepository;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -243,5 +251,40 @@ public class PageController {
         model.addAttribute("dentist", dentist);
         model.addAttribute("activePage", "profile");
         return "dentist/dentist-profile";
+    }
+
+    @GetMapping("/dentist/dentist-schedule")
+    public String viewDentistSchedule(
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Model model,
+            Principal principal) {
+
+        if (principal == null) return "redirect:/auth";
+
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        if (dentist == null) return "redirect:/logout";
+
+        // Default to today if no date is provided in the URL
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        model.addAttribute("dentist", dentist);
+        model.addAttribute("activePage", "appointments");
+        model.addAttribute("selectedDate", date);
+
+        List<ScheduleChangeRequest> changeRequests = scheduleChangeRequestRepository.findByDentistIdCustomOrder(dentist.getId());
+        model.addAttribute("changeRequests", changeRequests);
+
+        // Fetch appointments for this specific dentist on the selected date
+        List<Appointment> appointments = appointmentRepository.findByDentistIdAndAppointmentDateOrderByStartTimeAsc(dentist.getId(), date);
+        model.addAttribute("appointments", appointments);
+
+        // Fetch weekly working hours for this dentist
+        List<DentistSchedule> workingHours = dentistScheduleRepository.findByDentistId(dentist.getId());
+        model.addAttribute("workingHours", workingHours);
+
+        return "dentist/dentist-schedule";
     }
 }

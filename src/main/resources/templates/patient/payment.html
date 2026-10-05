@@ -17,7 +17,29 @@
     <script type="text/javascript" src="https://www.payhere.lk/lib/payhere.js"></script>
 
     <style>
-        .main-content { flex: 1; padding: 48px; max-width: 1200px; width: 100%; }
+        /* --- Base Layout --- */
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
         .header { margin-bottom: 40px; }
         .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
         .header p { color: var(--text-muted); font-size: 15px; }
@@ -67,71 +89,73 @@
 <div th:replace="~{patient/fragments/sidebar :: patient-sidebar}"></div>
 
 <main class="main-content">
-    <div class="header">
-        <h1>Billing & Payments</h1>
-        <p>Manage your consultation fees and view payment history.</p>
-    </div>
+    <div class="content-container">
+        <div class="header">
+            <h1>Billing & Payments</h1>
+            <p>Manage your consultation fees and view payment history.</p>
+        </div>
 
-    <div class="glass-card">
-        <table>
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Method</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th style="text-align: right;">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="payment : ${payments}">
-                <td th:text="${#temporals.format(payment.createdAt, 'MMM dd, yyyy')}">Oct 15, 2026</td>
-                <td>
-                    <div style="font-weight: 700;" th:text="${payment.appointment.serviceType}">Checkup</div>
-                    <div style="font-size: 12px; color: var(--text-muted);" th:text="'Dr. ' + ${payment.appointment.dentist.fullName}">Dr. Smith</div>
-                </td>
-                <td>
-                    <span th:if="${payment.method == 'CASH'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">payments</span> Cash</span>
-                    <span th:if="${payment.method == 'ONLINE'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">credit_card</span> PayHere</span>
-                    <span th:if="${payment.method == 'BANK_TRANSFER'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">account_balance</span> Bank</span>
-                </td>
-                <td th:text="'Rs. ' + ${#numbers.formatDecimal(payment.amount, 1, 2)}">Rs. 1500.00</td>
-                <td>
-                    <span th:if="${payment.status == 'PENDING_VISIT' || payment.status == 'PENDING_ONLINE' || payment.status == 'PENDING_TRANSFER'}" class="status-badge status-pending">Pending</span>
-                    <span th:if="${payment.status == 'PENDING_TRANSFER_VERIFICATION'}" class="status-badge status-processing">Verifying</span>
-                    <span th:if="${payment.status == 'COMPLETED'}" class="status-badge status-completed">Completed</span>
-                    <span th:if="${payment.status == 'REJECTED'}" class="status-badge status-rejected">Rejected</span>
-                </td>
-                <td style="text-align: right;">
+        <div class="glass-card">
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="payment : ${payments}">
+                    <td th:text="${#temporals.format(payment.createdAt, 'MMM dd, yyyy')}">Oct 15, 2026</td>
+                    <td>
+                        <div style="font-weight: 700;" th:text="${payment.appointment.serviceType}">Checkup</div>
+                        <div style="font-size: 12px; color: var(--text-muted);" th:text="'Dr. ' + ${payment.appointment.dentist.fullName}">Dr. Smith</div>
+                    </td>
+                    <td>
+                        <span th:if="${payment.method == 'CASH'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">payments</span> Cash</span>
+                        <span th:if="${payment.method == 'ONLINE'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">credit_card</span> PayHere</span>
+                        <span th:if="${payment.method == 'BANK_TRANSFER'}"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">account_balance</span> Bank</span>
+                    </td>
+                    <td th:text="'Rs. ' + ${#numbers.formatDecimal(payment.amount, 1, 2)}">Rs. 1500.00</td>
+                    <td>
+                        <span th:if="${payment.status == 'PENDING_VISIT' || payment.status == 'PENDING_ONLINE' || payment.status == 'PENDING_TRANSFER'}" class="status-badge status-pending">Pending</span>
+                        <span th:if="${payment.status == 'PENDING_TRANSFER_VERIFICATION'}" class="status-badge status-processing">Verifying</span>
+                        <span th:if="${payment.status == 'COMPLETED'}" class="status-badge status-completed">Completed</span>
+                        <span th:if="${payment.status == 'REJECTED'}" class="status-badge status-rejected">Rejected</span>
+                    </td>
+                    <td style="text-align: right;">
 
-                    <!-- Actions based on status and method -->
+                        <!-- Actions based on status and method -->
 
-                    <!-- Online Pending -->
-                    <button th:if="${payment.status == 'PENDING_ONLINE'}" class="btn-action btn-pay" th:onclick="'startOnlinePayment(' + ${payment.id} + ')'">
-                        <span class="material-symbols-outlined">security</span> Pay Now
-                    </button>
+                        <!-- Online Pending -->
+                        <button th:if="${payment.status == 'PENDING_ONLINE'}" class="btn-action btn-pay" th:onclick="'startOnlinePayment(' + ${payment.id} + ')'">
+                            <span class="material-symbols-outlined">security</span> Pay Now
+                        </button>
 
-                    <!-- Bank Transfer Pending or Rejected -->
-                    <button th:if="${(payment.method == 'BANK_TRANSFER') and (payment.status == 'PENDING_TRANSFER' or payment.status == 'REJECTED')}" class="btn-action btn-upload" th:onclick="'openBankModal(' + ${payment.id} + ')'">
-                        <span class="material-symbols-outlined">upload_file</span> Upload Slip
-                    </button>
+                        <!-- Bank Transfer Pending or Rejected -->
+                        <button th:if="${(payment.method == 'BANK_TRANSFER') and (payment.status == 'PENDING_TRANSFER' or payment.status == 'REJECTED')}" class="btn-action btn-upload" th:onclick="'openBankModal(' + ${payment.id} + ')'">
+                            <span class="material-symbols-outlined">upload_file</span> Upload Slip
+                        </button>
 
-                    <!-- Cash Pending -->
-                    <span th:if="${payment.status == 'PENDING_VISIT'}" style="font-size: 13px; color: var(--text-muted);">Pay at Clinic</span>
+                        <!-- Cash Pending -->
+                        <span th:if="${payment.status == 'PENDING_VISIT'}" style="font-size: 13px; color: var(--text-muted);">Pay at Clinic</span>
 
-                    <!-- Completed (All Methods) -->
-                    <button th:if="${payment.status == 'COMPLETED'}" class="btn-action btn-receipt" th:onclick="'generateReceipt(' + ${payment.id} + ')'">
-                        <span class="material-symbols-outlined">receipt</span> Receipt
-                    </button>
+                        <!-- Completed (All Methods) -->
+                        <button th:if="${payment.status == 'COMPLETED'}" class="btn-action btn-receipt" th:onclick="'generateReceipt(' + ${payment.id} + ')'">
+                            <span class="material-symbols-outlined">receipt</span> Receipt
+                        </button>
 
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(payments)}">
-                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No payment records found.</td>
-            </tr>
-            </tbody>
-        </table>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(payments)}">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No payment records found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </main>
 

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Schedule</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            background: #f8fafc;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 1300px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) 440px;
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 16px;
+        }
+
+        /* Schedule Section */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .appointment-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            transition: 0.3s;
+        }
+
+        .appointment-row:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 90, 183, 0.08);
+        }
+
+        .apt-time {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-color);
+            min-width: 100px;
+        }
+
+        .apt-patient {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .apt-patient h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .apt-patient p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-confirmed {
+            background: rgba(0, 90, 183, 0.08);
+            color: var(--primary-color);
+            border: 1px solid rgba(0, 90, 183, 0.15);
+        }
+
+        .badge-approved {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-rejected {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-left: 20px;
+        }
+
+        /* Hours & Requests */
+        .hours-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hour-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px dashed rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hour-row.active-day {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .hour-row.off-day {
+            opacity: 0.6;
+        }
+
+        .request-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 18px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .request-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .request-reason-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .request-reason-text {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-color);
+            line-height: 1.4;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .request-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .request-record-item {
+            background: #ffffff;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+        }
+
+        /* Buttons & Modals */
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-danger-outline:hover {
+            background: #fee2e2;
+        }
+
+        .btn-success {
+            background: #166534;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 28, 45, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: var(--shadow-ambient);
+            max-height: 90vh;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: auto;
+            height: auto;
+            opacity: 0;
+        }
+
+        .custom-input-box {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #fff;
+            font-size: 14px;
+            font-family: 'Manrope', sans-serif;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .custom-input-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .custom-input-box .material-symbols-outlined {
+            color: var(--text-muted);
+            font-size: 20px;
+        }
+
+        .input-wrapper textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            font-family: 'Manrope', sans-serif;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .input-wrapper textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .dynamic-record {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .record-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 12px;
+        }
+
+        .record-title {
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .remove-record-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .remove-record-btn:hover {
+            background: #fecaca;
+        }
+
+        .type-toggle-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .type-btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #f8fafc;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .type-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
+        }
+
+        .type-btn.active.permanent-active {
+            background: #dc2626 !important;
+            border-color: #dc2626 !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .fullday-toggle-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #f8fafc;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fullday-toggle-btn.active {
+            background: #fffbeb;
+            color: #d97706;
+            border-color: #fde68a;
+        }
+
+        .permanent-warning {
+            font-size: 11px;
+            color: #dc2626;
+            font-weight: 800;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            margin-top: -8px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<div th:replace="~{dentist/fragments/sidebar :: dentist-sidebar}"></div>
+
+<main class="main-content">
+    <div class="content-container">
+
+        <div class="header">
+            <h1>My Schedule</h1>
+            <p>Manage your daily appointments and request schedule changes.</p>
+        </div>
+
+        <div class="dashboard-layout">
+
+            <!-- LEFT: Schedule & Appointments -->
+            <div class="glass-card">
+                <div class="section-title">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                        Daily Schedule
+                    </div>
+                    <input type="date" id="scheduleDate"
+                           style="padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); font-family: 'Manrope';"
+                           th:value="${selectedDate != null ? selectedDate : #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
+                </div>
+
+                <div class="appointment-list">
+                    <div class="appointment-row" th:each="apt : ${appointments}">
+                        <div class="apt-time" th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">09:00 AM</div>
+                        <div class="apt-patient">
+                            <h4 th:text="${apt.patient.fullName}">John Doe</h4>
+                            <p th:text="${apt.serviceType} + ' • Notes: ' + (${apt.patientNotes != null ? apt.patientNotes : 'None'})">
+                                Routine Checkup</p>
+                        </div>
+                        <div class="apt-status">
+                            <span th:class="'badge badge-' + ${#strings.toLowerCase(apt.status)}"
+                                  th:text="${apt.status}">PENDING</span>
+                        </div>
+                        <div class="btn-group">
+                            <button th:if="${apt.status == 'PENDING'}" class="btn-success"
+                                    th:onclick="'confirmAppointment(' + ${apt.id} + ')'" title="Confirm Visit">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">check</span>
+                            </button>
+                            <button th:if="${apt.status == 'SCHEDULED'}" class="btn-outline"
+                                    th:onclick="'completeAppointment(' + ${apt.id} + ')'" title="Mark as Done">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">task_alt</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(appointments)}"
+                         style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <span class="material-symbols-outlined"
+                              style="font-size: 48px; opacity: 0.5; margin-bottom: 12px;">event_available</span>
+                        <p style="font-weight: 600;">No appointments scheduled for this date.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Working Hours & Change Requests -->
+            <div>
+                <!-- Default Working Hours -->
+                <div class="glass-card">
+                    <div class="section-title">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined">schedule</span>
+                            Default Weekly Hours
+                        </div>
+                    </div>
+
+                    <div class="hours-list">
+                        <div th:each="schedule : ${workingHours}"
+                             th:class="'hour-row ' + (${schedule.isWorkingDay} ? 'active-day' : 'off-day')">
+                            <span th:text="${schedule.dayOfWeek}">Monday</span>
+                            <div th:if="${schedule.isWorkingDay}">
+                                <span th:text="${#temporals.format(schedule.startTime, 'hh:mm a')} + ' - ' + ${#temporals.format(schedule.endTime, 'hh:mm a')}">09:00 AM - 05:00 PM</span>
+                            </div>
+                            <span th:unless="${schedule.isWorkingDay}"
+                                  style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Off Day</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Change Requests -->
+                <div class="glass-card">
+                    <div class="section-title">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined">free_cancellation</span>
+                            Overrides & Leaves
+                        </div>
+                        <button class="btn-primary" style="padding: 6px 12px;" onclick="openRequestModal()">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">add</span> Request
+                        </button>
+                    </div>
+
+                    <div class="hours-list">
+                        <div class="request-card" th:each="req : ${changeRequests}">
+
+                            <!-- Redesigned Header: Status Badge & Cancel Button side by side -->
+                            <div class="request-header-top" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span th:class="'badge badge-' + ${#strings.toLowerCase(req.status)}" th:text="${req.status}">PENDING</span>
+
+                                <!-- Safely check status string / enum -->
+                                <button th:if="${#strings.toString(req.status) == 'PENDING'}" class="btn-danger-outline" th:onclick="'cancelRequest(' + ${req.id} + ')'">
+                                    Cancel
+                                </button>
+                            </div>
+
+                            <!-- Reorganized Reason and Clean Creation Timestamp -->
+                            <div class="request-reason-box">
+                                <div class="request-reason-text" th:text="${req.reason}">Reason here</div>
+                                <div class="request-meta">
+                                    <span>Requested on <span th:text="${#temporals.format(req.createdAt, 'MMM dd, yyyy • hh:mm a')}">Oct 05, 2026 • 02:30 PM</span></span>
+                                </div>
+                            </div>
+
+                            <!-- Nested Records with Permanent vs Temporary distinction -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                                <div class="request-record-item" th:each="record : ${req.records}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong th:text="${#temporals.format(record.targetDate, 'MMM dd, yyyy')}">Oct
+                                            10, 2026</strong>
+                                        <span th:style="${record.changeType.name() == 'PERMANENT'} ? 'font-size: 11px; font-weight: 800; color: #dc2626;' : 'font-size: 11px; font-weight: 800; color: #005ab7;'"
+                                              th:text="${record.changeType}">TEMPORARY</span>
+                                    </div>
+                                    <div style="color: var(--text-muted); font-weight: 600;">
+                                        <!-- Full Day Off check -->
+                                        <span th:if="${record.isFullDayOff or record.newStartTime == null or record.newEndTime == null}"
+                                              th:style="${record.changeType.name() == 'PERMANENT'} ? 'color: #dc2626; font-weight: 700;' : 'color: #d97706; font-weight: 700;'"
+                                              th:text="${record.changeType.name() == 'PERMANENT'} ? 'Permanent Full Day Off' : 'Full Day Off (One-time)'">Full Day Off</span>
+
+                                        <!-- Time Adjustment check -->
+                                        <span th:unless="${record.isFullDayOff or record.newStartTime == null or record.newEndTime == null}"
+                                              th:text="${record.changeType.name() == 'PERMANENT'} ? 'Adjusted: ' + ${#temporals.format(record.newStartTime, 'hh:mm a')} + ' - ' + ${#temporals.format(record.newEndTime, 'hh:mm a')} : 'Adjusted: ' + ${#temporals.format(record.newStartTime, 'hh:mm a')} + ' - ' + ${#temporals.format(record.newEndTime, 'hh:mm a')}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:if="${req.adminNotes != null}"
+                                 style="background: #fffbeb; padding: 10px 12px; border-radius: 10px; color: #b45309; border: 1px solid #fde68a; font-size: 12px;">
+                                <strong>Admin Note:</strong> <span th:text="${req.adminNotes}"></span>
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(changeRequests)}"
+                             style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px;">
+                            No override requests found.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- MULTI-DATE REQUEST MODAL -->
+<div class="modal-overlay" id="requestModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">edit_calendar</span> Schedule Change Request</h2>
+            <button class="close-btn" onclick="closeRequestModal()"><span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form id="requestForm">
+
+            <div id="recordsContainer">
+                <!-- Records injected here by JS -->
+            </div>
+
+            <button type="button" class="btn-outline"
+                    style="width: 100%; justify-content: center; margin-bottom: 24px; border-style: dashed;"
+                    onclick="addRecordRow()">
+                <span class="material-symbols-outlined">add</span> Add Another Date
+            </button>
+
+            <div class="input-group">
+                <label>Overall Reason for Request</label>
+                <div class="input-wrapper">
+                    <textarea id="reqReason" rows="3" placeholder="Explain why you are requesting these changes..."
+                              required></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button type="button" class="btn-outline" onclick="closeRequestModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitScheduleRequest()" id="submitReqBtn">Submit
+                    Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // --- APPOINTMENT LOGIC ---
+    async function confirmAppointment(id) {
+        if (!confirm("Confirm this appointment?")) return;
+        const res = await fetch(`/api/dentist/appointments/${id}/confirm`, {method: 'PUT'});
+        res.ok ? window.location.reload() : alert("Failed to confirm.");
+    }
+
+    async function completeAppointment(id) {
+        if (!confirm("Mark as completed?")) return;
+        const res = await fetch(`/api/dentist/appointments/${id}/complete`, {method: 'PUT'});
+        res.ok ? window.location.reload() : alert("Failed to update status.");
+    }
+
+    async function cancelRequest(id) {
+        if (!confirm("Are you sure you want to cancel this pending request?")) return;
+        const res = await fetch(`/api/dentist/schedule/requests/${id}`, {method: 'DELETE'});
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            alert("Failed to cancel request.");
+        }
+    }
+
+    document.getElementById('scheduleDate').addEventListener('change', function (e) {
+        window.location.href = `/dentist/appointments?date=${e.target.value}`;
+    });
+
+    // --- DYNAMIC OVERRIDE REQUEST LOGIC ---
+
+    const recordTemplate = `
+        <div class="dynamic-record">
+            <div class="record-card-top">
+                <div class="record-title"><span class="material-symbols-outlined" style="font-size: 18px;">event</span> Target Date Entry</div>
+                <button type="button" class="remove-record-btn" onclick="this.closest('.dynamic-record').remove()">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">delete</span> Remove
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label>Select Date</label>
+                <div class="custom-input-box" onclick="this.querySelector('input').showPicker()">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <input type="date" class="recDate" required>
+                </div>
+            </div>
+
+            <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-color);">Change Type</label>
+            <div class="type-toggle-group">
+                <button type="button" class="type-btn active" onclick="setChangeType(this, 'TEMPORARY')">Temporary Change</button>
+                <button type="button" class="type-btn" onclick="setChangeType(this, 'PERMANENT')">Permanent Change</button>
+            </div>
+            <input type="hidden" class="recType" value="TEMPORARY">
+
+            <button type="button" class="fullday-toggle-btn" onclick="toggleFullDay(this)">
+                <span class="material-symbols-outlined" style="font-size: 18px;">block</span> Mark as Full Day Off
+            </button>
+            <input type="hidden" class="recFullDay" value="false">
+
+            <div class="time-grid recTimesDiv">
+                <div class="input-group">
+                    <label>New Start Time</label>
+                    <div class="custom-input-box" onclick="this.querySelector('input').showPicker()">
+                        <span class="material-symbols-outlined">schedule</span>
+                        <input type="time" class="recStart">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>New End Time</label>
+                    <div class="custom-input-box" onclick="this.querySelector('input').showPicker()">
+                        <span class="material-symbols-outlined">schedule</span>
+                        <input type="time" class="recEnd">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    function getTomorrowDateStr() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function addRecordRow() {
+        document.getElementById('recordsContainer').insertAdjacentHTML('beforeend', recordTemplate);
+
+        const newestDateInput = document.querySelector('#recordsContainer .dynamic-record:last-child .recDate');
+        if (newestDateInput) {
+            newestDateInput.min = getTomorrowDateStr();
+        }
+    }
+
+    function setChangeType(buttonElement, typeValue) {
+        const group = buttonElement.closest('.type-toggle-group');
+        const recordCard = buttonElement.closest('.dynamic-record');
+        const warningDiv = recordCard.querySelector('.permanent-warning');
+
+        group.querySelectorAll('.type-btn').forEach(btn => {
+            btn.classList.remove('active', 'permanent-active');
+        });
+
+        buttonElement.classList.add('active');
+        recordCard.querySelector('.recType').value = typeValue;
+
+        if (typeValue === 'PERMANENT') {
+            buttonElement.classList.add('permanent-active');
+        }
+    }
+
+    function toggleFullDay(buttonElement) {
+        const recordCard = buttonElement.closest('.dynamic-record');
+        const hiddenInput = recordCard.querySelector('.recFullDay');
+        const timeGrid = recordCard.querySelector('.recTimesDiv');
+
+        const isOff = hiddenInput.value === 'true';
+        if (!isOff) {
+            hiddenInput.value = 'true';
+            buttonElement.classList.add('active');
+            buttonElement.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span> Full Day Off Selected`;
+            timeGrid.style.opacity = '0.3';
+            timeGrid.style.pointerEvents = 'none';
+            timeGrid.querySelectorAll('input').forEach(i => i.value = '');
+        } else {
+            hiddenInput.value = 'false';
+            buttonElement.classList.remove('active');
+            buttonElement.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">block</span> Mark as Full Day Off`;
+            timeGrid.style.opacity = '1';
+            timeGrid.style.pointerEvents = 'auto';
+        }
+    }
+
+    function openRequestModal() {
+        document.getElementById('recordsContainer').innerHTML = '';
+        addRecordRow();
+        document.getElementById('requestModal').classList.add('active');
+    }
+
+    function closeRequestModal() {
+        document.getElementById('requestModal').classList.remove('active');
+        document.getElementById('requestForm').reset();
+    }
+
+    async function submitScheduleRequest() {
+        const btn = document.getElementById('submitReqBtn');
+        const reason = document.getElementById('reqReason').value;
+        const recordElements = document.querySelectorAll('.dynamic-record');
+
+        if (!reason) return alert("Please provide an overall reason.");
+        if (recordElements.length === 0) return alert("Please add at least one date.");
+
+        const records = [];
+        const selectedDates = new Set();
+        let hasError = false;
+        let duplicateFound = false;
+
+        recordElements.forEach(el => {
+            const targetDate = el.querySelector('.recDate').value;
+            const changeType = el.querySelector('.recType').value;
+            const isFullDayOff = el.querySelector('.recFullDay').value === 'true';
+            const newStartTime = el.querySelector('.recStart').value;
+            const newEndTime = el.querySelector('.recEnd').value;
+
+            if (!targetDate) {
+                hasError = true;
+            } else {
+                if (selectedDates.has(targetDate)) {
+                    duplicateFound = true;
+                }
+                selectedDates.add(targetDate);
+            }
+
+            if (!isFullDayOff && (!newStartTime || !newEndTime)) hasError = true;
+
+            records.push({
+                targetDate: targetDate,
+                changeType: changeType,
+                isFullDayOff: isFullDayOff,
+                newStartTime: isFullDayOff ? null : newStartTime,
+                newEndTime: isFullDayOff ? null : newEndTime
+            });
+        });
+
+        if (hasError) return alert("Please ensure all dates and times are filled correctly.");
+        if (duplicateFound) return alert("Error: Each record must have a distinct date. You cannot select the same target date twice in one request.");
+
+        const payload = {
+            reason: reason,
+            records: records
+        };
+
+        btn.disabled = true;
+        btn.innerText = "Submitting...";
+
+        try {
+            const response = await fetch('/api/dentist/schedule/request-change', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert("Request submitted successfully to Admin.");
+                window.location.reload();
+            } else {
+                alert("Submission failed: " + await response.text());
+                btn.disabled = false;
+                btn.innerText = "Submit Request";
+            }
+        } catch (error) {
+            alert("Network error occurred.");
+            btn.disabled = false;
+            btn.innerText = "Submit Request";
+        }
+    }
+</script>
+</body>
+</html>

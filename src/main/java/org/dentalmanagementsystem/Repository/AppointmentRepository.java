@@ -22,5 +22,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Used by the patient dashboard to display their history
     List<Appointment> findByPatientIdOrderByAppointmentDateDescStartTimeDesc(Long patientId);
 
+    List<Appointment> findByDentistIdAndAppointmentDateOrderByStartTimeAsc(Long dentistId, LocalDate appointmentDate);
+
     Optional<Appointment> findFirstByPatientIdAndStatusAndAppointmentDateGreaterThanEqualOrderByAppointmentDateAscStartTimeAsc(Long patientId, String status, LocalDate currentDate);
 }

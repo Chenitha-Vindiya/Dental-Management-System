@@ -46,7 +46,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 newPatient.setFullName(name);
                 newPatient.setPassword(UUID.randomUUID().toString());
                 newPatient.setVerified(true);
-                newPatient.setProfilePicture(pictureUrl); // Save the picture
+                newPatient.setProfilePicture(pictureUrl);
 
                 patientRepository.save(newPatient);
                 System.out.println("Registered new patient via Social Login: " + email);
