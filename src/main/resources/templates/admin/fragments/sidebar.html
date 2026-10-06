@@ -25,7 +25,7 @@
             <span class="nav-text">Dentists</span>
         </a>
 
-        <a href="#" class="nav-item" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+        <a th:href="@{/admin/manage-appointments}" class="nav-item" th:classappend="${activePage == 'manage-appointments'} ? 'active' : ''">
             <span class="material-symbols-outlined">calendar_month</span>
             <span class="nav-text">Appointments</span>
         </a>
@@ -35,9 +35,9 @@
             <span class="nav-text">Admins</span>
         </a>
 
-        <a href="#" class="nav-item" th:classappend="${activePage == 'settings'} ? 'active' : ''">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="nav-text">Settings</span>
+        <a th:href="@{/admin/schedule-requests}" class="nav-item" th:classappend="${activePage == 'schedule-requests'} ? 'active' : ''">
+            <span class="material-symbols-outlined">event_upcoming</span>
+            <span class="nav-text">Schedule Requests</span>
         </a>
     </nav>
 

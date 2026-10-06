@@ -1,10 +1,427 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - System Appointments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
+
+    <style>
+        /* Lock body and HTML scrolling so the sidebar stays fixed */
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #f8fafc;
+            font-family: 'Manrope', sans-serif;
+            color: #1e293b;
+        }
+
+        body {
+            display: flex;
+        }
+
+        /* Main content takes full remaining width and handles layout structure */
+        .main-content {
+            flex: 1;
+            padding: 36px 48px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Glass card configured to expand and contain the scrollable list */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 28px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 14px;
+            flex-shrink: 0;
+        }
+
+        .search-bar-mini {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .search-bar-mini:focus-within {
+            border-color: #005ab7;
+            box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.08);
+        }
+
+        .search-bar-mini input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 13px;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 600;
+            outline: none;
+        }
+
+        /* ONLY THIS CONTAINER SCROLLS: Independent scrollable area for records */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto !important;
+            flex: 1;
+            padding-right: 8px;
+            padding-bottom: 20px;
+        }
+
+        /* --- TWO-SIDED APPOINTMENT CARD LAYOUT --- */
+        .appointment-card-item {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .appointment-card-item:hover {
+            border-color: rgba(0, 90, 183, 0.3);
+            box-shadow: 0 6px 16px rgba(0, 90, 183, 0.05);
+        }
+
+        /* Left Side: Patient & Appointment Data */
+        .apt-left-side {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .apt-avatar-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: #f1f5f9;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #64748b;
+            overflow: hidden;
+        }
+
+        .apt-avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .apt-content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .apt-top-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .apt-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .apt-pill.date-pill {
+            color: #005ab7;
+            background: rgba(0, 90, 183, 0.06);
+            border-color: rgba(0, 90, 183, 0.15);
+        }
+
+        .apt-info-block h4 {
+            margin: 0 0 2px 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .apt-info-block p {
+            margin: 0;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Right Side: Assigned Dentist Info with Dynamic Initials Avatar */
+        .apt-right-side {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-left: 24px;
+            border-left: 1px solid rgba(0, 0, 0, 0.06);
+            flex-shrink: 0;
+        }
+
+        .dentist-avatar-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(0, 90, 183, 0.08);
+            border: 1px solid rgba(0, 90, 183, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #005ab7;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            overflow: hidden;
+        }
+
+        .dentist-avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dentist-info-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+        }
+
+        .dentist-info-block span:first-child {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dentist-info-block h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-scheduled { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+        .badge-confirmed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-completed, .badge-done { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-cancelled { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-rescheduled { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+
+        @media (max-width: 900px) {
+            .appointment-card-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .apt-right-side {
+                border-left: none;
+                border-top: 1px solid rgba(0, 0, 0, 0.06);
+                padding-left: 0;
+                padding-top: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-$END$
+
+<div th:replace="~{admin/fragments/sidebar :: admin-sidebar}"></div>
+
+<main class="main-content">
+    <div class="content-container">
+
+        <div class="header">
+            <h1>Appointment Management</h1>
+            <p>Review and monitor all patient appointments across the dental system.</p>
+        </div>
+
+        <div class="glass-card">
+            <div class="section-title">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined">event_note</span>
+                    All System Appointments (<span th:text="${#lists.size(appointments)}">0</span>)
+                </div>
+            </div>
+
+            <!-- Search bar to filter system appointments -->
+            <div class="search-bar-mini">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="systemAptSearchInput" onkeyup="filterSystemAppointments()" placeholder="Search by patient name, dentist, service, or status...">
+            </div>
+
+            <!-- Scrollable Appointment Records List -->
+            <div class="appointment-list" id="systemAptListContainer">
+                <div class="appointment-card-item" th:each="apt : ${appointments}">
+
+                    <!-- LEFT SIDE: Patient Details & Appointment Info -->
+                    <div class="apt-left-side">
+                        <div class="apt-avatar-box">
+                            <span th:if="${apt.patient.profilePicture == null}" class="material-symbols-outlined" style="font-size: 28px;">person</span>
+                            <img th:if="${apt.patient.profilePicture != null}" th:src="${apt.patient.profilePicture}" alt="Patient Profile">
+                        </div>
+
+                        <div class="apt-content-area">
+                            <div class="apt-top-pills">
+                                <span class="apt-pill date-pill">
+                                    <span class="material-symbols-outlined" style="font-size: 13px;">event</span>
+                                    <span th:text="${#temporals.format(apt.appointmentDate, 'MMM dd, yyyy')}">Oct 06, 2026</span>
+                                </span>
+                                <span class="apt-pill">
+                                    <span class="material-symbols-outlined" style="font-size: 13px;">schedule</span>
+                                    <span th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">09:00 AM</span>
+                                </span>
+                                <span th:class="'badge badge-' + ${#strings.toLowerCase(apt.status)}" th:text="${apt.status}">SCHEDULED</span>
+                            </div>
+
+                            <div class="apt-info-block">
+                                <h4 th:text="${apt.patient.fullName}">Patient Name</h4>
+                                <p th:text="'Service: ' + ${apt.serviceType}">Service Info</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE: Assigned Dentist Details with Dynamic Initials Avatar -->
+                    <div class="apt-right-side">
+                        <div class="dentist-avatar-box" th:data-dentist-name="${apt.dentist.fullName}">
+                            <!-- Fallback/Dynamic initials computed via JS -->
+                            <span class="dentist-initials">DR</span>
+                        </div>
+                        <div class="dentist-info-block">
+                            <span>Assigned Dentist</span>
+                            <h5 th:text="'Dr. ' + ${apt.dentist.fullName}">Dr. Dentist Name</h5>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div th:if="${#lists.isEmpty(appointments)}" style="text-align: center; padding: 40px; color: #64748b;">
+                    <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.4; margin-bottom: 12px;">event_available</span>
+                    <p style="font-weight: 600;">No appointments found in the system database.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    // Automatically generate clean dynamic initials (e.g. "Nimal Perera" -> "NP") for each dentist avatar box
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('.dentist-avatar-box').forEach(box => {
+            const fullName = box.getAttribute('data-dentist-name');
+            if (fullName) {
+                const parts = fullName.trim().split(/\s+/);
+                let initials = "";
+                if (parts.length >= 2) {
+                    initials = (parts[0][0] + parts[1][0]).toUpperCase();
+                } else if (parts.length === 1) {
+                    initials = parts[0].substring(0, 2).toUpperCase();
+                }
+                const span = box.querySelector('.dentist-initials');
+                if (span) {
+                    span.innerText = initials;
+                }
+            }
+        });
+    });
+
+    // Live Search Filtering for System Appointments
+    function filterSystemAppointments() {
+        const input = document.getElementById("systemAptSearchInput").value.toLowerCase();
+        const cards = document.getElementsByClassName("appointment-card-item");
+
+        for (let i = 0; i < cards.length; i++) {
+            const text = cards[i].innerText.toLowerCase();
+            cards[i].style.display = text.includes(input) ? "flex" : "none";
+        }
+    }
+</script>
+
 </body>
 </html>

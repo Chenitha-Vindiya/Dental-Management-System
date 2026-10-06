@@ -205,7 +205,7 @@
         }
 
         /* Tag Color Themes */
-        .badge-scheduled {
+        .badge-scheduled, .badge-rescheduled {
             background: rgba(0, 90, 183, 0.08);
             color: var(--primary-color);
             border: 1px solid rgba(0, 90, 183, 0.15);
@@ -460,13 +460,15 @@
 
                 <!-- Side Action Buttons -->
                 <div class="card-side-actions"
-                     th:with="canModify=${apt.status == 'SCHEDULED' and (apt.payment == null or apt.payment.status == 'PENDING_VISIT' or apt.payment.status == 'PENDING_ONLINE' or apt.payment.status == 'PENDING_TRANSFER' or apt.payment.status == 'REJECTED')}">
+                     th:with="canModify=${(apt.status == 'SCHEDULED' or apt.status == 'RESCHEDULED') and (apt.payment == null or apt.payment.status == 'PENDING_VISIT' or apt.payment.status == 'PENDING_ONLINE' or apt.payment.status == 'PENDING_TRANSFER' or apt.payment.status == 'REJECTED')}">
 
-                    <button class="side-btn btn-reschedule" th:classappend="${!canModify ? 'btn-disabled' : ''}">
+                    <button class="side-btn btn-reschedule" th:classappend="${!canModify ? 'btn-disabled' : ''}"
+                            th:onclick="openRescheduleModal([[${apt.id}]], [[${apt.dentist.id}]])">
                         <span class="material-symbols-outlined">edit_calendar</span>
                     </button>
 
-                    <button class="side-btn btn-cancel" th:classappend="${!canModify ? 'btn-disabled' : ''}">
+                    <button class="side-btn btn-cancel" th:classappend="${!canModify ? 'btn-disabled' : ''}"
+                            th:onclick="cancelAppointment([[${apt.id}]])">
                         <span class="material-symbols-outlined">event_busy</span>
                     </button>
                 </div>
@@ -591,6 +593,42 @@
     </div>
 </div>
 
+<!-- RESCHEDULE MODAL -->
+<div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2>Reschedule Appointment</h2>
+            <button class="close-btn" onclick="closeRescheduleModal()"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <div class="calendar-header">
+            <div class="static-year" id="rescheduleYearDisplay">2026</div>
+            <div class="month-toggler">
+                <button onclick="changeRescheduleMonth(-1)"><span class="material-symbols-outlined">chevron_left</span></button>
+                <span id="rescheduleMonthDisplay" style="min-width: 100px; text-align: center;">September</span>
+                <button onclick="changeRescheduleMonth(1)"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+        </div>
+
+        <div class="slider-wrapper">
+            <button class="slider-nav-btn" onclick="scrollRescheduleSlider(-1)"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
+            <div class="date-slider" id="rescheduleDateSlider"></div>
+            <button class="slider-nav-btn" onclick="scrollRescheduleSlider(1)"><span class="material-symbols-outlined">arrow_forward_ios</span></button>
+        </div>
+
+        <div class="time-grid" id="rescheduleTimeGrid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px;">
+                Select a date above to view available time slots.
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+            <button class="btn-outline" onclick="closeRescheduleModal()">Cancel</button>
+            <button class="btn-primary" onclick="submitReschedule()" id="confirmRescheduleBtn">Confirm New Time <span class="material-symbols-outlined">check_circle</span></button>
+        </div>
+    </div>
+</div>
+
 <script>
     // --- MODAL CONTROLS ---
     function openBookingModal() {
@@ -651,12 +689,10 @@
         slider.innerHTML = '';
 
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
         const sysDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
         for (let i = 1; i <= daysInMonth; i++) {
             const dateObj = new Date(currentYear, currentMonth, i);
-
             if(dateObj < sysDate) continue;
 
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
@@ -679,7 +715,6 @@
 
             slider.appendChild(box);
         }
-
         slider.scrollLeft = 0;
     }
 
@@ -716,7 +751,6 @@
         try {
             const response = await fetch(`/api/appointments/available?dentistId=${dentistId}&date=${dateStr}`);
             const times = await response.json();
-
             grid.innerHTML = '';
 
             if(times.length === 0) {
@@ -775,6 +809,168 @@
             alert("Network error occurred.");
             btn.disabled = false;
             btn.innerHTML = 'Confirm & Book <span class="material-symbols-outlined">check_circle</span>';
+        }
+    }
+
+    // --- RESCHEDULE & CANCEL LOGIC ---
+    let activeRescheduleId = null;
+    let activeRescheduleDentistId = null;
+    let reschYear = today.getFullYear();
+    let reschMonth = today.getMonth();
+    let reschSelectedDate = null;
+    let reschSelectedTime = null;
+
+    function openRescheduleModal(appointmentId, dentistId) {
+        activeRescheduleId = appointmentId;
+        activeRescheduleDentistId = dentistId;
+        reschSelectedDate = null;
+        reschSelectedTime = null;
+        document.getElementById('rescheduleModal').classList.add('active');
+        renderRescheduleCalendar();
+    }
+
+    function closeRescheduleModal() {
+        document.getElementById('rescheduleModal').classList.remove('active');
+    }
+
+    function renderRescheduleCalendar() {
+        document.getElementById('rescheduleMonthDisplay').innerText = monthNames[reschMonth];
+        document.getElementById('rescheduleYearDisplay').innerText = reschYear;
+
+        const slider = document.getElementById('rescheduleDateSlider');
+        slider.innerHTML = '';
+
+        const daysInMonth = new Date(reschYear, reschMonth + 1, 0).getDate();
+        const sysDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateObj = new Date(reschYear, reschMonth, i);
+            if(dateObj < sysDate) continue;
+
+            const dateStr = `${reschYear}-${String(reschMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+
+            const box = document.createElement('div');
+            box.className = 'date-box';
+            if (reschSelectedDate === dateStr) box.classList.add('selected');
+
+            box.innerHTML = `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">${dayName}</div>
+                             <div style="font-size: 24px; font-weight: 800;">${i}</div>`;
+
+            box.onclick = () => {
+                document.querySelectorAll('#rescheduleDateSlider .date-box').forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                reschSelectedDate = dateStr;
+                reschSelectedTime = null;
+                fetchRescheduleTimeSlots(dateStr);
+            };
+
+            slider.appendChild(box);
+        }
+        slider.scrollLeft = 0;
+    }
+
+    function changeRescheduleMonth(dir) {
+        const nextMonthIndex = reschMonth + dir;
+        const nextMonthDate = new Date(reschYear, nextMonthIndex, 1);
+        const thisMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        if (nextMonthDate < thisMonthDate) return;
+
+        reschMonth += dir;
+        if (reschMonth > 11) {
+            reschMonth = 0;
+            reschYear++;
+        } else if (reschMonth < 0) {
+            reschMonth = 11;
+            reschYear--;
+        }
+        renderRescheduleCalendar();
+    }
+
+    function scrollRescheduleSlider(direction) {
+        const slider = document.getElementById('rescheduleDateSlider');
+        const scrollAmount = slider.clientWidth * 0.75;
+        slider.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+
+    async function fetchRescheduleTimeSlots(dateStr) {
+        const grid = document.getElementById('rescheduleTimeGrid');
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 24px;"><span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span></div>';
+
+        try {
+            const response = await fetch(`/api/appointments/available?dentistId=${activeRescheduleDentistId}&date=${dateStr}`);
+            const times = await response.json();
+            grid.innerHTML = '';
+
+            if(times.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: #dc2626; background: #fee2e2; border-radius: 12px; font-weight: 600;">No available slots on this date.</div>`;
+                return;
+            }
+
+            times.forEach(time => {
+                const formattedTime = time.substring(0, 5);
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.innerText = formattedTime;
+
+                slot.onclick = () => {
+                    document.querySelectorAll('#rescheduleTimeGrid .time-slot').forEach(t => t.classList.remove('selected'));
+                    slot.classList.add('selected');
+                    reschSelectedTime = time;
+                };
+                grid.appendChild(slot);
+            });
+        } catch (error) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">Error loading slots. Please try again.</div>`;
+        }
+    }
+
+    async function submitReschedule() {
+        if(!reschSelectedDate || !reschSelectedTime) {
+            return alert("Please select a new date and time slot.");
+        }
+
+        const btn = document.getElementById('confirmRescheduleBtn');
+        btn.disabled = true;
+        btn.innerHTML = 'Rescheduling...';
+
+        try {
+            const response = await fetch(`/api/appointments/${activeRescheduleId}/reschedule`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ appointmentDate: reschSelectedDate, startTime: reschSelectedTime })
+            });
+
+            if(response.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed to reschedule: " + await response.text());
+                btn.disabled = false;
+                btn.innerHTML = 'Confirm New Time <span class="material-symbols-outlined">check_circle</span>';
+            }
+        } catch(error) {
+            alert("Network error occurred.");
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm New Time <span class="material-symbols-outlined">check_circle</span>';
+        }
+    }
+
+    async function cancelAppointment(appointmentId) {
+        if(!confirm("Are you sure you want to cancel this appointment?")) return;
+
+        try {
+            const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
+                method: 'PUT'
+            });
+
+            if(response.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed to cancel appointment: " + await response.text());
+            }
+        } catch(error) {
+            alert("Network error occurred.");
         }
     }
 </script>

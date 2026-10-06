@@ -629,7 +629,7 @@
 
                 if (response.ok) {
                     alert("Your account has been deactivated.");
-                    window.location.href = "/login";
+                    window.location.href = "/auth";
                 } else {
                     alert("Action failed: " + await response.text());
                 }

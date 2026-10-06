@@ -35,6 +35,9 @@ public class AdminDentistController {
         try {
             dentistService.toggleDentistStatus(id, request.get("status"));
             return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+        } catch (IllegalStateException e) {
+            // Catch the specific exception thrown by the service when appointments exist
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update status.");
         }

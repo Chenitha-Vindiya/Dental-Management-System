@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
@@ -41,6 +42,9 @@ public class PageController {
 
     @Autowired
     private ScheduleChangeRequestRepository scheduleChangeRequestRepository;
+
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
 
     @GetMapping({"/", "/index", "/home"})
     public String showIndexPage() {
@@ -227,22 +231,51 @@ public class PageController {
         return "admin/dentist-management";
     }
 
+    @GetMapping("/admin/manage-appointments")
+    public String viewAllAppointments(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth";
+
+        // Use the extractEmail helper if you applied the Google Login fix earlier
+        Admin admin = adminRepository.findByEmail(principal.getName());
+        if (admin == null) return "redirect:/logout";
+
+        model.addAttribute("activePage", "manage-appointments");
+        List<Appointment> appointments = appointmentRepository.findAll();
+        model.addAttribute("appointments", appointments);
+
+        return "admin/admin-appointments";
+    }
+
     // --- DENTIST ROUTES ---
 
     @GetMapping("/dentist/dashboard")
-    public String viewDashboard(Model model, Principal principal) {
+    public String dentistDashboard(Model model, Principal principal) {
         Dentist dentist = dentistRepository.findByEmail(principal.getName());
         model.addAttribute("dentist", dentist);
-        model.addAttribute("activePage", "dashboard");
-        return "dentist/dentist-dashboard";
-    }
 
-    @GetMapping("/dentist/appointments")
-    public String viewAppointments(Model model, Principal principal) {
-        Dentist dentist = dentistRepository.findByEmail(principal.getName());
-        model.addAttribute("dentist", dentist);
-        model.addAttribute("activePage", "appointments");
-        return "dentist/appointments";
+        LocalDate today = LocalDate.now();
+
+        // Fetch upcoming appointments and limit to top 5 using Java streams
+        List<Appointment> upcoming = appointmentRepository.findByDentistIdAndAppointmentDateGreaterThanEqualAndStatusIn(
+                dentist.getId(),
+                today,
+                List.of("SCHEDULED", "CONFIRMED")
+        ).stream().limit(5).toList();
+
+        model.addAttribute("upcomingAppointments", upcoming);
+
+        // Calculate statistics for the stats cards
+        long totalUpcoming = appointmentRepository.findByDentistIdAndAppointmentDateGreaterThanEqualAndStatusIn(
+                dentist.getId(), today, List.of("SCHEDULED", "CONFIRMED")
+        ).size();
+
+        long todayCount = appointmentRepository.findByDentistIdAndAppointmentDateAndStatusIn(dentist.getId(), today, List.of("SCHEDULED", "CONFIRMED")).size();
+
+        model.addAttribute("totalUpcoming", totalUpcoming);
+        model.addAttribute("todayCount", todayCount);
+        model.addAttribute("activePage", "dashboard");
+
+        return "dentist/dentist-dashboard";
     }
 
     @GetMapping("/dentist/profile")
@@ -255,8 +288,8 @@ public class PageController {
 
     @GetMapping("/dentist/dentist-schedule")
     public String viewDentistSchedule(
-            @RequestParam(value = "date", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(value = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             Model model,
             Principal principal) {
 
@@ -265,20 +298,25 @@ public class PageController {
         Dentist dentist = dentistRepository.findByEmail(principal.getName());
         if (dentist == null) return "redirect:/logout";
 
-        // Default to today if no date is provided in the URL
-        if (date == null) {
-            date = LocalDate.now();
+        // Default to current week's Monday if no startDate is provided
+        if (startDate == null) {
+            LocalDate now = LocalDate.now();
+            int dayOfWeek = now.getDayOfWeek().getValue(); // 1 = Mon, 7 = Sun
+            startDate = now.minusDays(dayOfWeek - 1);
         }
+
+        // Calculate end date of the week (Sunday)
+        LocalDate endDate = startDate.plusDays(6);
 
         model.addAttribute("dentist", dentist);
         model.addAttribute("activePage", "appointments");
-        model.addAttribute("selectedDate", date);
+        model.addAttribute("selectedStartDate", startDate);
 
         List<ScheduleChangeRequest> changeRequests = scheduleChangeRequestRepository.findByDentistIdCustomOrder(dentist.getId());
         model.addAttribute("changeRequests", changeRequests);
 
-        // Fetch appointments for this specific dentist on the selected date
-        List<Appointment> appointments = appointmentRepository.findByDentistIdAndAppointmentDateOrderByStartTimeAsc(dentist.getId(), date);
+        // Fetch appointments for this dentist across the entire week range
+        List<Appointment> appointments = appointmentRepository.findByDentistIdAndAppointmentDateBetweenOrderByAppointmentDateAscStartTimeAsc(dentist.getId(), startDate, endDate);
         model.addAttribute("appointments", appointments);
 
         // Fetch weekly working hours for this dentist
@@ -286,5 +324,46 @@ public class PageController {
         model.addAttribute("workingHours", workingHours);
 
         return "dentist/dentist-schedule";
+    }
+
+    @GetMapping("/admin/schedule-requests")
+    public String viewAdminScheduleRequests(Model model) {
+        model.addAttribute("activePage", "schedule-requests");
+        model.addAttribute("requests", scheduleChangeRequestRepository.findAllByOrderByCreatedAtDesc());
+        return "admin/admin-schedule-requests";
+    }
+
+    @GetMapping("/dentist/medical-records")
+    public String viewMyPatients(Principal principal, Model model) {
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        if (dentist == null) {
+            throw new RuntimeException("Dentist not found");
+        }
+
+        List<Patient> patients = appointmentRepository.findDistinctPatientsByDentistId(dentist.getId());
+        model.addAttribute("patients", patients);
+        model.addAttribute("activePage", "medical-records");
+
+        return "dentist/my-patients";
+    }
+
+    @GetMapping("/dentist/{patientId}/records")
+    public String viewPatientRecords(@PathVariable Long patientId, Principal principal, Model model) {
+        Dentist dentist = dentistRepository.findByEmail(principal.getName());
+        if (dentist == null) {
+            throw new RuntimeException("Dentist not found");
+        }
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        List<Appointment> appointments = appointmentRepository.findByPatientIdAndDentistIdOrderByAppointmentDateDesc(patientId, dentist.getId());
+        List<MedicalRecord> records = medicalRecordRepository.findByPatientIdAndDentistIdOrderByCreatedAtDesc(patientId, dentist.getId());
+
+        model.addAttribute("patient", patient);
+        model.addAttribute("appointments", appointments);
+        model.addAttribute("records", records);
+
+        return "dentist/patient-records";
     }
 }

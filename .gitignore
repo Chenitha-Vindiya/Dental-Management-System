@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Ignore local file uploads
+/uploads/
+uploads/
+
 ### STS ###
 .apt_generated
 .classpath

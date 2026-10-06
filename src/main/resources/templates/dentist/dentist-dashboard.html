@@ -7,7 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Reusing your global sidebar CSS -->
@@ -17,57 +17,119 @@
         .main-content {
             flex: 1;
             padding: 48px;
-            max-width: 1200px;
+            max-width: 1300px;
             width: 100%;
+            box-sizing: border-box;
         }
 
         .header {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .header h1 {
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 8px;
+            color: var(--text-color);
         }
 
         .header p {
             color: var(--text-muted);
             font-size: 15px;
+            font-weight: 500;
         }
 
-        .dashboard-grid {
+        /* --- STATS CARDS ROW --- */
+        .dash-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
         }
 
-        .glass-card {
-            background: var(--glass-bg);
+        .dash-stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .dash-stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: rgba(0, 90, 183, 0.1);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .dash-stat-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .dash-stat-info p {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- MAIN DASHBOARD GRID --- */
+        .dash-layout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .dash-layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dash-glass-card {
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-ambient);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             border-radius: 24px;
             padding: 32px;
         }
 
-        .card-header {
+        .dash-card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 16px;
         }
 
-        .card-title {
+        .dash-card-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 700;
+            gap: 10px;
+            font-weight: 800;
             font-size: 18px;
+            color: var(--text-color);
         }
 
-        .card-icon {
+        .dash-card-icon {
             width: 40px;
             height: 40px;
             border-radius: 12px;
@@ -78,57 +140,128 @@
             justify-content: center;
         }
 
-        .appointment-details {
-            background: var(--card-bg);
+        /* Upcoming Appointments List UI */
+        .dash-upcoming-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .dash-appointment-item {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 16px;
-            padding: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: 0.3s;
         }
 
-        .appointment-time {
-            font-size: 24px;
-            font-weight: 700;
+        .dash-appointment-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 6px 16px rgba(0, 90, 183, 0.05);
+        }
+
+        .dash-time-badge {
+            background: rgba(0, 90, 183, 0.08);
             color: var(--primary-color);
-            margin-bottom: 4px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 85px;
         }
 
-        .appointment-date {
-            color: var(--text-muted);
-            font-weight: 500;
+        .dash-time-badge .time {
             font-size: 14px;
-            margin-bottom: 16px;
+            font-weight: 800;
         }
 
-        .btn-action {
+        .dash-time-badge .date {
+            font-size: 10px;
+            font-weight: 700;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .dash-apt-info {
+            flex: 1;
+        }
+
+        .dash-apt-info h4 {
+            margin: 0 0 2px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .dash-apt-info p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .dash-badge {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dash-badge-scheduled {
+            background: rgba(0, 90, 183, 0.08);
+            color: var(--primary-color);
+            border: 1px solid rgba(0, 90, 183, 0.15);
+        }
+
+        .dash-badge-confirmed {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .dash-btn-action {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
+            gap: 6px;
+            padding: 8px 16px;
             background: var(--primary-color);
             color: white;
-            border-radius: 12px;
+            border-radius: 10px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all var(--transition-speed);
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.3s;
             border: none;
             cursor: pointer;
         }
 
-        .btn-action:hover {
+        .dash-btn-action:hover {
             background: var(--primary-hover);
-            transform: translateY(-2px);
         }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
+        /* Scoped Quick Action Links (Prevents global .nav-item conflict) */
+        .dash-quick-link {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 14px;
+            padding: 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: 0.3s;
         }
 
-        .btn-outline:hover {
-            background: rgba(0, 90, 183, 0.05);
+        .dash-quick-link:hover {
+            background: #ffffff;
+            border-color: var(--primary-color);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.05);
         }
     </style>
 </head>
@@ -144,75 +277,107 @@
 <!-- Main Content -->
 <main class="main-content">
     <div class="header">
-        <!-- Dynamic Greeting using Dentist array split -->
         <h1>Welcome back, Dr. <span th:text="${dentist != null ? #strings.arraySplit(dentist.fullName, ' ')[0] : 'Smith'}">Smith</span>!</h1>
-        <p>Here is your clinical schedule and overview for today.</p>
+        <p>Here is your clinical schedule overview and summary stats.</p>
     </div>
 
-    <div class="dashboard-grid">
+    <!-- STATS CARDS ROW -->
+    <div class="dash-stats-grid">
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon">
+                <span class="material-symbols-outlined">event_note</span>
+            </div>
+            <div class="dash-stat-info">
+                <h3 th:text="${totalUpcoming}">0</h3>
+                <p>Upcoming Visits</p>
+            </div>
+        </div>
 
-        <!-- Next Patient Card -->
-        <div class="glass-card">
-            <div class="card-header">
-                <div class="card-title">
-                    <div class="card-icon">
-                        <span class="material-symbols-outlined">person</span>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon">
+                <span class="material-symbols-outlined">today</span>
+            </div>
+            <div class="dash-stat-info">
+                <h3 th:text="${todayCount}">0</h3>
+                <p>Today's Patients</p>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(22, 101, 52, 0.1); color: #166534;">
+                <span class="material-symbols-outlined">verified_user</span>
+            </div>
+            <div class="dash-stat-info">
+                <h3 style="color: #166534;">Active</h3>
+                <p>Dentist Status</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dash-layout-grid">
+
+        <!-- Upcoming Appointments Card List (Limited to 5) -->
+        <div class="dash-glass-card">
+            <div class="dash-card-header">
+                <div class="dash-card-title">
+                    <div class="dash-card-icon">
+                        <span class="material-symbols-outlined">event_upcoming</span>
                     </div>
-                    Next Patient
+                    Upcoming Appointments
+                </div>
+                <a th:href="@{/dentist/dentist-schedule}" style="font-size: 13px; font-weight: 700; color: var(--primary-color); text-decoration: none;">View All</a>
+            </div>
+
+            <!-- List of upcoming appointments -->
+            <div class="dash-upcoming-list" th:if="${upcomingAppointments != null and !#lists.isEmpty(upcomingAppointments)}">
+                <div class="dash-appointment-item" th:each="apt : ${upcomingAppointments}">
+                    <div class="dash-time-badge">
+                        <div class="time" th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">10:30 AM</div>
+                        <div class="date" th:text="${#temporals.format(apt.appointmentDate, 'MMM dd')}">Oct 15</div>
+                    </div>
+                    <div class="dash-apt-info">
+                        <h4 th:text="${apt.patient.fullName}">Sarah Jenkins</h4>
+                        <p th:text="${apt.serviceType}  ">Root Canal Therapy</p>
+                    </div>
+                    <div>
+                        <span th:class="'dash-badge dash-badge-' + ${#strings.toLowerCase(apt.status)}" th:text="${apt.status}">SCHEDULED</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- CONDITION 1: If an appointment exists -->
-            <div class="appointment-details" th:if="${nextPatient != null}">
-                <div class="appointment-time" th:text="${#temporals.format(nextPatient.dateTime, 'hh:mm a')}">10:30 AM</div>
-                <div class="appointment-date" th:text="${#temporals.format(nextPatient.dateTime, 'EEEE, MMMM d, yyyy')}">Thursday, October 15, 2026</div>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
-                    <strong>Patient:</strong> <span th:text="${nextPatient.patientName}">Sarah Jenkins</span><br>
-                    <strong>Procedure:</strong> <span th:text="${nextPatient.type}">Root Canal Therapy</span>
-                </p>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn-action">
-                        View Records
-                    </button>
-                    <button class="btn-action btn-outline">
-                        Start Session
-                    </button>
-                </div>
-            </div>
-
-            <!-- CONDITION 2: Empty State -->
-            <div class="appointment-details" th:unless="${nextPatient != null}" style="text-align: center; padding: 32px 20px; background: transparent; border: 1px dashed rgba(0,0,0,0.1);">
-                <span class="material-symbols-outlined" style="font-size: 40px; color: var(--text-muted); opacity: 0.5; margin-bottom: 8px;">free_cancellation</span>
-                <p style="color: var(--text-muted); font-weight: 600; font-size: 15px;">No upcoming patients</p>
-                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Your schedule is clear for now.</p>
-                <a href="/dentist/appointments" class="btn-action" style="background: var(--card-bg); color: var(--primary-color); border: 1px solid var(--primary-color);">
-                    View Full Schedule
+            <!-- Empty State if no upcoming appointments -->
+            <div th:unless="${upcomingAppointments != null and !#lists.isEmpty(upcomingAppointments)}" style="text-align: center; padding: 48px 20px; border: 2px dashed rgba(0,0,0,0.08); border-radius: 18px;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--text-muted); opacity: 0.4; margin-bottom: 12px;">event_available</span>
+                <p style="color: var(--text-color); font-weight: 700; font-size: 16px; margin-bottom: 4px;">No upcoming appointments</p>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Your schedule is clear of scheduled patient visits.</p>
+                <a th:href="@{/dentist/appointments}" class="dash-btn-action">
+                    Manage Schedule
                 </a>
             </div>
         </div>
 
         <!-- Quick Actions Card -->
-        <div class="glass-card">
-            <div class="card-header">
-                <div class="card-title">
-                    <div class="card-icon">
+        <div class="dash-glass-card">
+            <div class="dash-card-header">
+                <div class="dash-card-title">
+                    <div class="dash-card-icon">
                         <span class="material-symbols-outlined">medical_services</span>
                     </div>
                     Clinical Actions
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <a th:href="@{/dentist/appointments}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px; text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                <a th:href="@{/dentist/dentist-schedule}" class="dash-quick-link">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">calendar_today</span>
-                    <span style="color: var(--text-color); font-weight: 600;">Manage Daily Schedule</span>
+                    <span style="color: var(--text-color); font-weight: 700; font-size: 14px;">Manage Daily Schedule</span>
                 </a>
-                <a th:href="@{/dentist/records}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px; text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                <a th:href="@{/dentist/records}" class="dash-quick-link">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">note_add</span>
-                    <span style="color: var(--text-color); font-weight: 600;">Add Clinical Notes</span>
+                    <span style="color: var(--text-color); font-weight: 700; font-size: 14px;">Add Clinical Notes</span>
                 </a>
-                <a th:href="@{/dentist/patients}" class="nav-item" style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 14px 16px; text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                <a th:href="@{/dentist/patients}" class="dash-quick-link">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">folder_shared</span>
-                    <span style="color: var(--text-color); font-weight: 600;">Review Medical Histories</span>
+                    <span style="color: var(--text-color); font-weight: 700; font-size: 14px;">Review Medical Histories</span>
                 </a>
             </div>
         </div>

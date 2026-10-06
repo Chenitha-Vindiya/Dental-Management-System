@@ -17,7 +17,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Publicly accessible paths
-                        .requestMatchers("/", "/auth", "/api/auth/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/uploads/**", "/images/**","/", "/auth", "/api/auth/**", "/css/**", "/js/**").permitAll()
 
                         // SECURE ALL ADMIN PAGES AND APIS
                         .requestMatchers("/admin/**", "/api/admin/**").authenticated()

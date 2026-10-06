@@ -5,30 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraDent - Manage Dentists</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
 
+    <link rel="stylesheet" th:href="@{/css/admin/admin-sidebar.css}">
     <style>
         .main-content {
             flex-grow: 1;
             padding: 48px;
             overflow-y: auto;
             height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .header h1 {
-            font-size: 28px;
+            font-size: 32px;
+            font-weight: 800;
             color: var(--text-color);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-bar-wrapper {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transition: 0.3s;
+        }
+
+        .search-bar-wrapper:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(0, 90, 183, 0.1);
+        }
+
+        .search-bar-wrapper .material-symbols-outlined {
+            color: var(--text-muted);
+            font-size: 24px;
+        }
+
+        .search-bar-wrapper input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 15px;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 500;
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .search-bar-wrapper input::placeholder {
+            color: #9ca3af;
         }
 
         .btn-primary {
@@ -37,132 +87,223 @@
             border: none;
             padding: 12px 24px;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             transition: 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
         }
 
         .btn-primary:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 90, 183, 0.2);
+            box-shadow: 0 6px 16px rgba(0, 90, 183, 0.3);
         }
 
-        /* Data Table Section */
-        .table-container {
-            background: var(--card-bg);
+        /* --- CARD GRID LAYOUT --- */
+        .dentists-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .dentist-card {
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 24px;
-            padding: 32px;
-            box-shadow: var(--shadow-ambient);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 16px 16px 24px 16px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        td {
-            padding: 20px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-color);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            vertical-align: middle;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        /* Avatar Styling */
-        .dentist-name-col {
+            padding: 24px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: 0.3s ease;
+        }
+
+        .dentist-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 90, 183, 0.08);
+            border-color: rgba(0, 90, 183, 0.2);
+        }
+
+        /* Card Header Wrapper */
+        .card-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        /* Card Header (Avatar + Name + Specialization + Joined) */
+        .card-header-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
         }
 
         .avatar-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e0e7ff;
-            color: #3730a3;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(0, 90, 183, 0.1), rgba(0, 90, 183, 0.2));
+            color: var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .dentist-name-group h3 {
+            margin: 0 0 2px 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .dentist-name-group p {
+            margin: 0 0 4px 0;
+            font-size: 12px;
             font-weight: 700;
-            font-size: 15px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dentist-joined-meta {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        /* Minimal Status Badge */
+        .status-badge-min {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             flex-shrink: 0;
         }
 
-        /* Status Styling */
-        .status-wrapper {
+        .badge-active-min {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-suspended-min {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        /* Card Body (Details) */
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 0;
+            border-top: 1px dashed rgba(0, 0, 0, 0.08);
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+
+        .info-row {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-weight: 700;
-            min-width: 110px;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
-        .status-active { color: #166534; }
-        .status-suspended { color: #dc2626; }
-
-        .status-wrapper .material-symbols-outlined {
-            font-size: 20px;
+        .info-row .material-symbols-outlined {
+            font-size: 16px;
+            color: var(--primary-color);
+            opacity: 0.7;
         }
 
-        /* Action Buttons in Table */
-        .actions-col {
+        /* Card Footer (More compact full-width buttons) */
+        .card-actions-vertical {
             display: flex;
-            justify-content: flex-end;
-            gap: 12px;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: auto;
         }
 
-        .action-btn {
-            width: 40px;
-            height: 40px;
+        .action-btn-full {
+            width: 100%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: none;
-            border: none;
+            gap: 6px;
+            padding: 9px 14px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 8px;
             transition: 0.2s;
+            font-family: 'Manrope', sans-serif;
         }
 
-        .action-btn .material-symbols-outlined {
-            font-size: 20px;
+        .action-btn-full .material-symbols-outlined {
+            font-size: 16px;
         }
 
-        .action-btn.view { background: rgba(0, 90, 183, 0.1); color: var(--primary-color); }
-        .action-btn.view:hover { background: var(--primary-color); color: #fff; }
+        .btn-schedule {
+            background: rgba(0, 90, 183, 0.08);
+            color: var(--primary-color);
+            border: 1px solid rgba(0, 90, 183, 0.15);
+        }
 
-        .action-btn.danger { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
-        .action-btn.danger:hover { background: #dc2626; color: #fff; }
+        .btn-schedule:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
 
-        .action-btn.success { background: rgba(22, 101, 52, 0.1); color: #166534; }
-        .action-btn.success:hover { background: #166534; color: #fff; }
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.08);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.15);
+        }
 
-        /* Modals */
+        .btn-danger:hover {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: rgba(22, 101, 52, 0.08);
+            color: #166534;
+            border: 1px solid rgba(22, 101, 52, 0.15);
+        }
+
+        .btn-success:hover {
+            background: #166534;
+            color: #fff;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 24px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px);
+            border: 2px dashed rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+        }
+
+        /* Modals Minimal & Sleek */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -182,28 +323,39 @@
         }
 
         .modal-content {
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 24px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: var(--shadow-ambient);
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .modal-content.large {
+            max-width: 480px;
+        }
+
+        .modal-content.centered {
+            text-align: center;
+            padding: 32px 24px;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .modal-header h2 {
-            font-size: 20px;
+            font-size: 16px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-color);
         }
 
         .close-btn {
@@ -212,6 +364,9 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: 0.2s;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
         }
 
         .close-btn:hover {
@@ -220,24 +375,26 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .input-group label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
             color: var(--text-color);
+            text-align: left;
         }
 
         .input-wrapper input, .email-addon-wrapper input {
             width: 100%;
-            padding: 14px 16px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
             border: 1px solid rgba(0, 0, 0, 0.1);
             background: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
+            font-size: 13px;
+            font-family: 'Manrope', sans-serif;
             outline: none;
             transition: all 0.3s;
         }
@@ -247,14 +404,13 @@
             box-shadow: 0 0 0 3px rgba(0, 90, 183, 0.1);
         }
 
-        /* Specific Add-on for Email Domain */
         .email-addon-wrapper {
             display: flex;
             align-items: stretch;
         }
 
         .email-addon-wrapper input {
-            border-radius: 12px 0 0 12px;
+            border-radius: 10px 0 0 10px;
             border-right: none;
         }
 
@@ -262,13 +418,13 @@
             background: rgba(0, 0, 0, 0.03);
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-left: none;
-            border-radius: 0 12px 12px 0;
-            padding: 0 16px;
+            border-radius: 0 10px 10px 0;
+            padding: 0 12px;
             display: flex;
             align-items: center;
             color: var(--text-muted);
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 13px;
             white-space: nowrap;
         }
 
@@ -279,10 +435,120 @@
             background: #fff3f3;
             border: 1px solid #ffcdd2;
             color: #d32f2f;
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        /* --- CALENDAR UI --- */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            font-size: 14px;
+        }
+
+        .calendar-controls button {
+            background: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .calendar-controls button:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .calendar-controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .calendar-controls h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .cal-header {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .cal-day {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Blue for Working Days */
+        .cal-day.working {
+            background: #e0f2fe !important;
+            color: #0284c7 !important;
+            border-color: #bae6fd !important;
+        }
+
+        /* Yellow for Temporary Off / Leave Days */
+        .cal-day.temp-off {
+            background: #fef08a !important;
+            color: #854d0e !important;
+            border-color: #fde047 !important;
+        }
+
+        .cal-day.empty {
+            background: transparent;
+            border: none;
+        }
+
+        .legend {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -297,82 +563,111 @@
     <div class="header">
         <div>
             <h1>Dentist Directory</h1>
-            <p style="color: var(--text-muted); margin-top: 4px;">Manage registered dentist profiles and assignments.</p>
+            <p>Manage registered dentist profiles, statuses, and credentials.</p>
         </div>
         <button class="btn-primary" onclick="openModal('addDentistModal')">
             <span class="material-symbols-outlined">person_add</span> Register Dentist
         </button>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-            <tr>
-                <th>Dentist Name</th>
-                <th>Email</th>
-                <th>Specialization</th>
-                <th>Status</th>
-                <th style="text-align: right;">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="dentist : ${dentists}">
-                <td>
-                    <div class="dentist-name-col">
-                        <div class="avatar-circle" th:text="${#strings.substring(dentist.fullName, 0, 2)}">DR</div>
-                        <span th:text="${dentist.fullName}">Dr. Smith</span>
-                    </div>
-                </td>
-                <td th:text="${dentist.email}">smith@dentist.com</td>
-                <td th:text="${dentist.specialization}">General Dentistry</td>
-                <td>
-                    <!-- Active Status -->
-                    <div th:if="${dentist.active}" class="status-wrapper status-active">
-                        <span class="material-symbols-outlined">check_circle</span> Active
-                    </div>
-                    <!-- Suspended Status -->
-                    <div th:unless="${dentist.active}" class="status-wrapper status-suspended">
-                        <span class="material-symbols-outlined">block</span> Suspended
-                    </div>
-                </td>
-                <td>
-                    <div class="actions-col">
-                        <!-- View Button (Matches Design) -->
-                        <button class="action-btn view" title="View Profile">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
+    <!-- Search Bar (Autofill Prevented) -->
+    <div class="search-bar-wrapper">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="dentistSearchInput" name="dentist_search_query" autocomplete="off"
+               onkeyup="filterDentists()" placeholder="Search dentists by name, email, or specialization...">
+    </div>
 
-                        <!-- Suspend Button -->
-                        <button th:if="${dentist.active}" class="action-btn danger"
-                                th:onclick="'toggleStatus(' + ${dentist.id} + ', false)'" title="Suspend Dentist">
-                            <span class="material-symbols-outlined">block</span>
-                        </button>
+    <!-- CARDS GRID -->
+    <div class="dentists-grid" id="dentistsGrid">
 
-                        <!-- Restore Button -->
-                        <button th:unless="${dentist.active}" class="action-btn success"
-                                th:onclick="'toggleStatus(' + ${dentist.id} + ', true)'" title="Restore Dentist">
-                            <span class="material-symbols-outlined">settings_backup_restore</span>
-                        </button>
+        <!-- Individual Card -->
+        <div class="dentist-card" th:each="dentist : ${dentists}">
+
+            <div class="card-header-wrapper">
+                <div class="card-header-info">
+                    <div class="avatar-circle" th:text="${#strings.substring(dentist.fullName, 0, 2)}">DR</div>
+                    <div class="dentist-name-group">
+                        <h3 class="d-name" th:text="${dentist.fullName}">Dr. Smith</h3>
+                        <p class="d-spec" th:text="${dentist.specialization}">General Dentistry</p>
+                        <!-- Created At / Joined Meta placed right under Specialization -->
+                        <div class="dentist-joined-meta"
+                             th:text="'Joined ' + (${dentist.createdAt != null ? #temporals.format(dentist.createdAt, 'MMM dd, yyyy') : 'N/A'})">
+                            Joined Oct 05, 2026
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(dentists)}">
-                <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">No dentists
-                    registered yet.
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                </div>
+
+                <!-- Minimal Status Badge Moved to Top Right -->
+                <div th:if="${dentist.active}" class="status-badge-min badge-active-min" title="Active Staff">
+                    <span class="material-symbols-outlined" style="font-size: 11px;">check_circle</span> Active
+                </div>
+                <div th:unless="${dentist.active}" class="status-badge-min badge-suspended-min"
+                     title="Suspended Access">
+                    <span class="material-symbols-outlined" style="font-size: 11px;">block</span> Suspended
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="material-symbols-outlined">mail</span>
+                    <span class="d-email" th:text="${dentist.email}">smith@dentist.com</span>
+                </div>
+                <!-- Phone Number -->
+                <div class="info-row">
+                    <span class="material-symbols-outlined">call</span>
+                    <span th:text="${dentist.phoneNumber != null ? dentist.phoneNumber : 'Not provided'}">+94 77 000 0000</span>
+                </div>
+                <!-- Date of Birth -->
+                <div class="info-row">
+                    <span class="material-symbols-outlined">cake</span>
+                    <span th:text="${dentist.dateOfBirth != null ? #temporals.format(dentist.dateOfBirth, 'MMM dd, yyyy') : 'Not set'}">Jan 01, 1980</span>
+                </div>
+                <!-- Consultation Fee with two decimal places -->
+                <div class="info-row">
+                    <span class="material-symbols-outlined">payments</span>
+                    <span th:text="'LKR ' + ${#numbers.formatDecimal(dentist.consultationFee, 1, 'COMMA', 2, 'POINT')}">LKR 2,500.00</span>
+                </div>
+            </div>
+
+            <div class="card-actions-vertical">
+                <button class="action-btn-full btn-schedule"
+                        th:data-id="${dentist.id}"
+                        th:data-name="${dentist.fullName}"
+                        onclick="openScheduleModal(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+                    <span class="material-symbols-outlined">calendar_month</span> View Working Schedule
+                </button>
+
+                <button th:if="${dentist.active}" class="action-btn-full btn-danger"
+                        th:data-id="${dentist.id}"
+                        onclick="confirmToggleStatus(this.getAttribute('data-id'), false)">
+                    <span class="material-symbols-outlined">person_off</span> Suspend Access
+                </button>
+
+                <button th:unless="${dentist.active}" class="action-btn-full btn-success"
+                        th:data-id="${dentist.id}"
+                        onclick="confirmToggleStatus(this.getAttribute('data-id'), true)">
+                    <span class="material-symbols-outlined">settings_backup_restore</span> Restore Access
+                </button>
+            </div>
+
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(dentists)}" id="noDataState">
+            <span class="material-symbols-outlined"
+                  style="font-size: 56px; color: var(--primary-color); opacity: 0.4; margin-bottom: 12px;">medical_information</span>
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--text-color); margin-bottom: 6px;">No Dentists Found</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Your directory is empty or no dentists match your search.</p>
+        </div>
+
     </div>
 </main>
 
 <!-- ADD DENTIST MODAL -->
 <div class="modal-overlay" id="addDentistModal">
-    <div class="modal-content">
+    <div class="modal-content large">
         <div class="modal-header">
             <h2><span class="material-symbols-outlined">person_add</span> Add Dentist</h2>
-            <button class="close-btn" onclick="closeModal('addDentistModal')">
-                <span class="material-symbols-outlined">close</span>
+            <button class="close-btn" onclick="closeModal('addDentistModal')"><span class="material-symbols-outlined">close</span>
             </button>
         </div>
 
@@ -383,49 +678,183 @@
 
         <div class="input-group">
             <label>Full Name</label>
-            <div class="input-wrapper"><input type="text" id="newFullName" placeholder="Dr. Sarah Jenkins"></div>
+            <div class="input-wrapper"><input type="text" id="newFullName" placeholder="Dr. Sarah Jenkins"
+                                              autocomplete="off"></div>
         </div>
 
-        <!-- SPECIAL DOMAIN INPUT -->
         <div class="input-group">
             <label>Work Email</label>
             <div class="email-addon-wrapper">
-                <input type="text" id="newEmailPrefix" placeholder="sarah.jenkins">
+                <input type="text" id="newEmailPrefix" placeholder="sarah.jenkins" autocomplete="off">
                 <div class="domain-addon">@dentist.com</div>
             </div>
         </div>
 
         <div class="input-group">
             <label>Specialization</label>
-            <div class="input-wrapper"><input type="text" id="newSpecialization" placeholder="e.g. Orthodontics"></div>
+            <div class="input-wrapper"><input type="text" id="newSpecialization" placeholder="e.g. Orthodontics"
+                                              autocomplete="off"></div>
         </div>
 
-        <div class="input-group" style="margin-bottom: 32px;">
+        <div class="input-group" style="margin-bottom: 24px;">
             <label>Initial Password</label>
-            <div class="input-wrapper"><input type="password" id="newPassword" placeholder="Set temporary password">
-            </div>
+            <div class="input-wrapper"><input type="password" id="newPassword" placeholder="Set temporary password"
+                                              autocomplete="new-password"></div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 12px;">
-            <button class="action-btn" style="border: 1px solid rgba(0,0,0,0.1); padding: 12px 24px; font-weight: 600; width: auto; border-radius: 12px;"
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="action-btn-full"
+                    style="background: transparent; color: var(--text-muted); border: 1px solid rgba(0,0,0,0.1); width: auto; padding: 10px 18px;"
                     onclick="closeModal('addDentistModal')">Cancel
             </button>
-            <button class="btn-primary" onclick="submitNewDentist()">Save Dentist</button>
+            <button class="btn-primary" style="padding: 10px 20px; font-size: 13px;" onclick="submitNewDentist()">Save Profile</button>
+        </div>
+    </div>
+</div>
+
+<!-- SCHEDULE MODAL -->
+<div class="modal-overlay" id="scheduleModal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined">calendar_month</span> Schedule: <span
+                    id="scheduleDentistName"></span></h2>
+            <button class="close-btn" onclick="closeModal('scheduleModal')"><span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="calendar-controls">
+            <button id="prevMonthBtn" onclick="changeCalMonth(-1)"><span
+                    class="material-symbols-outlined">chevron_left</span></button>
+            <h3 id="calMonthYearDisplay">October 2026</h3>
+            <button id="nextMonthBtn" onclick="changeCalMonth(1)"><span
+                    class="material-symbols-outlined">chevron_right</span></button>
+        </div>
+
+        <!-- Monday-first week headers -->
+        <div class="calendar-grid">
+            <div class="cal-header">Mon</div>
+            <div class="cal-header">Tue</div>
+            <div class="cal-header">Wed</div>
+            <div class="cal-header">Thu</div>
+            <div class="cal-header">Fri</div>
+            <div class="cal-header">Sat</div>
+            <div class="cal-header">Sun</div>
+        </div>
+
+        <div class="calendar-grid" id="calDatesGrid"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #e0f2fe; border: 1px solid #bae6fd;"></div>
+                Working Day
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot"
+                     style="background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1);"></div>
+                Off Day
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #fef08a; border: 1px solid #fde047;"></div>
+                Temp Off
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ACTION CONFIRMATION MODAL -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-content centered">
+        <span class="material-symbols-outlined"
+              style="font-size: 48px; color: #d97706; margin-bottom: 12px;">warning</span>
+        <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-color); justify-content: center;">Confirm Action</h2>
+        <p id="confirmMessage" style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px; line-height: 1.4;"></p>
+
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button class="action-btn-full"
+                    style="background: transparent; color: var(--text-muted); border: 1px solid rgba(0,0,0,0.1); width: auto; padding: 10px 18px; font-size: 13px;"
+                    onclick="closeModal('confirmModal')">Cancel
+            </button>
+            <button class="btn-primary" style="width: auto; padding: 10px 24px; font-size: 13px;" onclick="proceedConfirm()">Yes, Proceed</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS / ERROR ALERT MODAL -->
+<div class="modal-overlay" id="alertModal">
+    <div class="modal-content centered">
+        <span class="material-symbols-outlined" id="alertIcon" style="font-size: 48px; margin-bottom: 12px;">info</span>
+        <h2 id="alertTitle" style="font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-color); justify-content: center;">Title</h2>
+        <p id="alertMessage" style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px; line-height: 1.4;">Message goes here</p>
+
+        <div style="display: flex; justify-content: center;">
+            <button id="alertBtn" class="btn-primary" style="width: auto; padding: 10px 32px; font-size: 13px;">Okay</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- GENERIC MODAL LOGIC ---
     function openModal(modalId) {
         document.getElementById(modalId).classList.add('active');
-        document.getElementById('addErrorBanner').style.display = 'none';
     }
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.remove('active');
     }
 
-    function showError(msg) {
+    // Custom Alert/Status Modal
+    function showStatusModal(type, title, message, reloadOnClose = false) {
+        const icon = document.getElementById('alertIcon');
+        const btn = document.getElementById('alertBtn');
+
+        if (type === 'success') {
+            icon.innerText = 'check_circle';
+            icon.style.color = '#166534';
+            btn.style.background = '#166534';
+        } else {
+            icon.innerText = 'error';
+            icon.style.color = '#dc2626';
+            btn.style.background = '#dc2626';
+        }
+
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertMessage').innerText = message;
+
+        btn.onclick = () => {
+            closeModal('alertModal');
+            if (reloadOnClose) window.location.reload();
+        };
+
+        openModal('alertModal');
+    }
+
+    // --- SEARCH LOGIC ---
+    function filterDentists() {
+        const input = document.getElementById("dentistSearchInput").value.toLowerCase();
+        const cards = document.getElementsByClassName("dentist-card");
+        let visibleCount = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            const name = cards[i].querySelector(".d-name").innerText.toLowerCase();
+            const spec = cards[i].querySelector(".d-spec").innerText.toLowerCase();
+            const email = cards[i].querySelector(".d-email").innerText.toLowerCase();
+
+            if (name.includes(input) || spec.includes(input) || email.includes(input)) {
+                cards[i].style.display = "flex";
+                visibleCount++;
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+
+        const emptyState = document.getElementById("noDataState");
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    // --- DENTIST CRUD LOGIC ---
+    function showInlineError(msg) {
         document.getElementById('addErrorMessage').innerText = msg;
         document.getElementById('addErrorBanner').style.display = 'flex';
     }
@@ -437,7 +866,7 @@
         const specialization = document.getElementById('newSpecialization').value.trim();
 
         if (!name || !emailPrefix || !password) {
-            return showError("Please fill in all required fields.");
+            return showInlineError("Please fill in all required fields.");
         }
 
         const fullEmail = emailPrefix + "@dentist.com";
@@ -455,20 +884,39 @@
                 })
             });
 
+            closeModal('addDentistModal');
+
             if (response.ok) {
-                window.location.reload();
+                showStatusModal('success', 'Profile Created', 'The dentist profile has been created successfully.', true);
             } else {
-                showError(await response.text());
+                showStatusModal('error', 'Creation Failed', await response.text());
             }
         } catch (e) {
-            showError("Network error occurred.");
+            closeModal('addDentistModal');
+            showStatusModal('error', 'Network Error', 'A network error occurred while creating the profile.');
         }
     }
 
-    async function toggleStatus(id, newStatus) {
-        const action = newStatus ? "restore" : "suspend";
-        if (!confirm(`Are you sure you want to ${action} this dentist?`)) return;
+    // --- TOGGLE CONFIRMATION LOGIC ---
+    let pendingAction = null;
 
+    function confirmToggleStatus(id, newStatus) {
+        const actionText = newStatus ? "restore system access for" : "suspend system access for";
+        document.getElementById('confirmMessage').innerText = `Are you sure you want to ${actionText} this dentist?`;
+
+        pendingAction = () => executeToggleStatus(id, newStatus);
+        openModal('confirmModal');
+    }
+
+    function proceedConfirm() {
+        closeModal('confirmModal');
+        if (pendingAction) {
+            pendingAction();
+            pendingAction = null;
+        }
+    }
+
+    async function executeToggleStatus(id, newStatus) {
         try {
             const response = await fetch(`/api/admin/dentists/${id}/status`, {
                 method: 'PATCH',
@@ -477,12 +925,104 @@
             });
 
             if (response.ok) {
-                window.location.reload();
+                showStatusModal('success', 'Status Updated', 'The dentist status was updated successfully.', true);
             } else {
-                alert("Failed to update status: " + await response.text());
+                showStatusModal('error', 'Update Failed', await response.text());
             }
         } catch (e) {
-            alert("Network error occurred.");
+            showStatusModal('error', 'Network Error', 'A network error occurred while updating status.');
+        }
+    }
+
+    // --- CALENDAR LOGIC ---
+    const systemCurrentDate = new Date(); // To lock past months
+    const systemBaseMonthDate = new Date(systemCurrentDate.getFullYear(), systemCurrentDate.getMonth(), 1);
+
+    let calDate = new Date();
+    let currentDentistId = null;
+
+    function openScheduleModal(dentistId, dentistName) {
+        currentDentistId = dentistId;
+        document.getElementById('scheduleDentistName').innerText = dentistName;
+        calDate = new Date(); // Reset to current month on open
+        renderCalendar();
+        openModal('scheduleModal');
+    }
+
+    function changeCalMonth(dir) {
+        const targetDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir, 1);
+
+        // Block going backward past the current system month
+        if (targetDate < systemBaseMonthDate) return;
+
+        calDate.setMonth(calDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    async function renderCalendar() {
+        const year = calDate.getFullYear();
+        const month = calDate.getMonth(); // 0-indexed (0 = January)
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById('calMonthYearDisplay').innerText = `${monthNames[month]} ${year}`;
+
+        // Disable Previous button if viewing the current month
+        const prevBtn = document.getElementById('prevMonthBtn');
+        const viewingBaseDate = new Date(year, month, 1);
+        prevBtn.disabled = (viewingBaseDate <= systemBaseMonthDate);
+
+        const grid = document.getElementById('calDatesGrid');
+        grid.innerHTML = '';
+
+        // --- FETCH REAL DATA FROM BACKEND ---
+        let scheduleMap = {};
+        try {
+            const response = await fetch(`/api/admin/dentists/${currentDentistId}/schedule?year=${year}&month=${month + 1}`);
+            if (response.ok) {
+                const data = await response.json();
+                scheduleMap = data.scheduleMap || {};
+            }
+        } catch (e) {
+            console.error("Failed to fetch dentist schedule from server.", e);
+        }
+
+        // Calculate starting offset for Monday-first layout (JS getDay(): 0=Sun, 1=Mon ... 6=Sat)
+        const firstDayObj = new Date(year, month, 1);
+        let firstDayOfWeek = firstDayObj.getDay();
+        firstDayOfWeek = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Empty slots before the first day of the month for Monday-start alignment
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'cal-day empty';
+            grid.appendChild(empty);
+        }
+
+        // Render each day accurately based on backend mapping
+        for (let day = 1; day <= daysInMonth; day++) {
+            const formattedMonth = String(month + 1).padStart(2, '0');
+            const formattedDay = String(day).padStart(2, '0');
+            const dateKey = `${year}-${formattedMonth}-${formattedDay}`;
+
+            const cell = document.createElement('div');
+            cell.className = 'cal-day';
+            cell.innerText = day;
+
+            const status = scheduleMap[dateKey] ? scheduleMap[dateKey].toUpperCase() : '';
+
+            if (status === 'TEMP_OFF' || status === 'LEAVE' || status === 'OFF_OVERRIDE') {
+                cell.classList.add('temp-off');
+                cell.title = "Temporary Full Day Off (Leave)";
+            } else if (status === 'WORKING') {
+                cell.classList.add('working');
+                cell.title = "Working Day";
+            } else {
+                cell.title = "Standard Off Day";
+            }
+
+            grid.appendChild(cell);
         }
     }
 </script>

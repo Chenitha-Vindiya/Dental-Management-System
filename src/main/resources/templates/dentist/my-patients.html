@@ -1,10 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraDent - My Patients</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/patient/patient-sidebar.css}">
+
+    <style>
+        body { margin: 0; padding: 0; display: flex; min-height: 100vh; background: #f8fafc; font-family: 'Manrope', sans-serif; color: #1e293b; }
+        .main-content { flex: 1; padding: 48px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+        .content-container { width: 100%; max-width: 1200px; }
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+        .header p { color: #64748b; font-size: 15px; font-weight: 500; }
+
+        .search-bar { background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .search-bar input { border: none; outline: none; width: 100%; font-family: 'Manrope'; font-size: 15px; background: transparent; }
+
+        .patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .patient-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.9); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: 0.3s; display: flex; flex-direction: column; gap: 16px; }
+        .patient-card:hover { transform: translateY(-4px); border-color: rgba(0, 90, 183, 0.2); box-shadow: 0 12px 24px rgba(0, 90, 183, 0.08); }
+
+        .patient-header { display: flex; align-items: center; gap: 16px; }
+        .avatar-box { width: 56px; height: 56px; border-radius: 14px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #64748b; overflow: hidden; flex-shrink: 0; }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .info h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 800; }
+        .info p { margin: 0; font-size: 13px; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+        .btn-view { background: #f1f5f9; color: #005ab7; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; text-align: center; text-decoration: none; display: block; }
+        .btn-view:hover { background: #005ab7; color: white; }
+    </style>
 </head>
 <body>
-$END$
+
+<div th:replace="~{dentist/fragments/sidebar :: dentist-sidebar}"></div>
+
+<main class="main-content">
+    <div class="content-container">
+
+        <div class="header">
+            <h1>My Patients</h1>
+            <p>View profiles and clinical histories of patients you have treated.</p>
+        </div>
+
+        <div class="search-bar">
+            <span class="material-symbols-outlined" style="color: #64748b;">search</span>
+            <input type="text" id="searchInput" onkeyup="filterPatients()" placeholder="Search by patient name...">
+        </div>
+
+        <div class="patient-grid" id="patientGrid">
+            <div class="patient-card" th:each="patient : ${patients}">
+                <div class="patient-header">
+                    <div class="avatar-box">
+                        <span th:if="${patient.profilePicture == null}" class="material-symbols-outlined">person</span>
+                        <img th:if="${patient.profilePicture != null}" th:src="${patient.profilePicture}" alt="Avatar">
+                    </div>
+                    <div class="info">
+                        <h3 class="patient-name" th:text="${patient.fullName}">Patient Name</h3>
+                        <p><span class="material-symbols-outlined" style="font-size: 16px;">cake</span> <span th:text="${patient.dateOfBirth}">DOB</span></p>
+                    </div>
+                </div>
+                <a th:href="@{'/dentist/' + ${patient.id} + '/records'}" class="btn-view">View Medical Records</a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function filterPatients() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('patient-card');
+        for (let i = 0; i < cards.length; i++) {
+            const name = cards[i].querySelector('.patient-name').innerText.toLowerCase();
+            cards[i].style.display = name.includes(input) ? "flex" : "none";
+        }
+    }
+</script>
 </body>
 </html>

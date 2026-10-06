@@ -1,10 +1,9 @@
 package org.dentalmanagementsystem.Entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -20,16 +19,15 @@ public class ScheduleChangeRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id", nullable = false)
-    @JsonIgnore // Prevents infinite loops when converting to JSON
     private ScheduleChangeRequest scheduleChangeRequest;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
-    private LocalDate targetDate;
+    @Enumerated(EnumType.STRING)
+    private ChangeType changeType; // TEMPORARY or PERMANENT
+
+    private LocalDate targetDate; // Used for TEMPORARY
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ChangeType changeType; // TEMPORARY or PERMANENT
+    private DayOfWeek dayOfWeek; // NEW: Used for PERMANENT
 
     private boolean isFullDayOff;
 

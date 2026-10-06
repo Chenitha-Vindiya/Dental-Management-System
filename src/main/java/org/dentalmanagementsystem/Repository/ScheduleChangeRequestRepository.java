@@ -1,6 +1,7 @@
 package org.dentalmanagementsystem.Repository;
 
 import org.dentalmanagementsystem.Entity.ScheduleChangeRequest;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +18,8 @@ public interface ScheduleChangeRequestRepository extends JpaRepository<ScheduleC
     // CORE LOGIC: Find requests ordered by newest ID
     @Query("SELECT r FROM ScheduleChangeRequest r WHERE r.dentist.id = :dentistId ORDER BY r.id DESC")
     List<ScheduleChangeRequest> findByDentistIdCustomOrder(@Param("dentistId") Long dentistId);
+
+    List<ScheduleChangeRequest> findAllByOrderByCreatedAtDesc();
+
+
 }

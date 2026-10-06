@@ -2,12 +2,14 @@ package org.dentalmanagementsystem.Service;
 
 import org.dentalmanagementsystem.Entity.Dentist;
 import org.dentalmanagementsystem.Entity.DentistSchedule;
+import org.dentalmanagementsystem.Repository.AppointmentRepository;
 import org.dentalmanagementsystem.Repository.DentistRepository;
 import org.dentalmanagementsystem.Repository.DentistScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class DentistService {
 
     @Autowired
     private DentistScheduleRepository dentistScheduleRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     public List<Dentist> getAllDentists() {
         return dentistRepository.findAll();
@@ -48,6 +53,19 @@ public class DentistService {
     public void toggleDentistStatus(Long id, boolean status) {
         Dentist dentist = dentistRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Dentist not found."));
+
+        // If attempting to deactivate the dentist, check for active/confirmed appointments
+        if (!status) {
+            // You can adjust the statuses based on your exact Enum (e.g., SCHEDULED, CONFIRMED)
+            boolean hasConfirmedAppointments = appointmentRepository.existsUpcomingAppointmentsForDentist(
+                    id,
+                    LocalDate.now()
+            );
+
+            if (hasConfirmedAppointments) {
+                throw new IllegalStateException("Cannot deactivate dentist. They have confirmed upcoming appointments.");
+            }
+        }
 
         dentist.setActive(status);
         dentistRepository.save(dentist);
